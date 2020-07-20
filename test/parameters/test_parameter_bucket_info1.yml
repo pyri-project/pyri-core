@@ -1,0 +1,11 @@
+name: test_parameter_bucket_info
+scope: core
+uuid: 0a179bae-e8ff-4596-b495-c322ca751432
+version: 0.1.0
+description: This is a parameter bucket
+long_description: This is a long description of a parameter bucket
+help_url: ./a/url/to/help/somewhere.html
+tags: ["a_bucket", "etc"]
+groups:
+  - resource_name: test_parameter_group_info1.yml
+    resource_pkg: test.parameters
