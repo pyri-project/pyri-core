@@ -42,6 +42,7 @@ class ParameterInfo(NamedTuple):
     tags: List[str]
     visibility: ParameterVisibility
     access: ParameterAccess
+    secret: bool
     type_schema: Any
     default_value: Any
 

@@ -21,6 +21,7 @@ parameter_group_parameter_info_schema:
   tags: any(name(max=32),list(name(max=32)),required=False)
   visibility: enum('hidden','advanced','normal','default',required=False)
   access: enum('readonly','protected','all','default',required=False)
+  secret: bool(required=False)
   type_schema: any()
   default_value: any(required=False)
 

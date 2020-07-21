@@ -11,3 +11,4 @@ num_list_param:
 - 1
 - 100
 param1: hello world 3
+secret_param: my_password

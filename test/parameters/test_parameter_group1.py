@@ -71,6 +71,12 @@ async def test_yaml_parameter_group(tmpdir):
         assert map_param_val1_value1 == "val 1"
         assert await params1.get_param_item_count("map_param") == 2
 
+        # Secret parameter
+
+        secret_param_val1 = await params1.get_param_or_default("secret_param")
+        assert secret_param_val1 == "password"
+        await params1.set_param("secret_param", "my_password")
+
     with open(fname1, "r") as f2:
         saved_group1 = yaml.safe_load(f2)
 

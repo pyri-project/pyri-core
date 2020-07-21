@@ -476,14 +476,15 @@ def _load_group_info_tuple(yaml_info_dict: Dict[str,Any]):
         parameter_tags = _p2("tags", _load_tags)
         parameter_visibility = _p2("visibility", _load_visilibility_enum, ParameterVisibility.DEFAULT)
         parameter_access = _p2("access", _load_access_enum, ParameterAccess.DEFAULT)
+        parameter_secret = _p2("secret", bool, False)
         parameter_type_schema = parameter_info_dict["type_schema"]
         parameter_default_value = _p2("default_value")
 
         parameter_info = ParameterInfo(parameter_name, parameter_description, 
             parameter_long_description, parameter_help_url,
             parameter_tags, parameter_visibility,
-            parameter_access, parameter_type_schema, 
-            parameter_default_value)
+            parameter_access, parameter_secret, 
+            parameter_type_schema, parameter_default_value)
 
         parameters.append(parameter_info)
 
