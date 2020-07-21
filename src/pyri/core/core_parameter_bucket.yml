@@ -1,0 +1,8 @@
+name: pyri.core
+scope: core
+uuid: a7c2aba2-6c13-48eb-a0eb-a4299896d24b
+version: 0.1.0
+description: Parameters for PyRI Core runtime
+groups:
+  - resource_name: core_parameter_info.yml
+    resource_pkg: pyri.core

@@ -1,0 +1,27 @@
+name: core
+uuid: 81ad4749-32de-467b-9da4-b7632df40896
+version: 0.1.0
+description: Parameters for PyRI Core runtime
+visibility: normal
+access: all
+parameters:
+  - name: http_port
+    description: The http port to use
+    type_schema: int(required=False)
+    default_value: 8080
+  - name: http_start
+    description: Should http server start
+    type_schema: bool(required=False)
+    default: true
+  - name: robotraconteur_port
+    description: Robot Raconteur server port
+    type_schema: int(required=False)
+    default: 58653
+  - name: robotraconteur_nodename
+    description: The Robot Raconteur node name
+    type_schema: str(required=False)
+    default: tech.pyri
+  - name: robotraconteur_options
+    description: Robot Raconteur options in command line form
+    type_schema: list(str(),required=False)
+    default: null
