@@ -1,15 +1,22 @@
 import sys
+from appdirs import AppDirs
+import os.path
 
 class PyriCore():
-    def __init__(self, start_http=True, http_port=8080, https_port=None, https_cert=None robotraconteur_port=58675):
-        self._start_http = start_http
-        self._http_port = 8080
-        self._https_port = 8443
+    def __init__(self, config_dir = None):
+        if config_dir is None:
+            self._config_dir = _get_default_config_dir()
+        else:
+            self._config_dir = config_dir
 
-    def _start(self):
-        pass
-
-    def _stop(self):
-        pass
 
     
+
+
+    def run(self):
+        pass
+
+def _get_default_config_dir():
+    dirs = AppDirs("pyri", "pyri_project")
+    config_dir = os.path.join(dirs.user_data_dir, "config")
+    return config_dir
