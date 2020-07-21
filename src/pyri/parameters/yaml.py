@@ -331,6 +331,14 @@ class NameValidator(yamale.validators.Regex):
         super().__init__(*args, **kwargs)
         self.regexes = [re.compile(r"^(?:[a-zA-Z](?:\w*[a-zA-Z0-9])?)$")]
 
+class QualifiedNameValidator(yamale.validators.Regex):
+    tag = 'qualified_name'
+    constraints = [yamale.validators.constraints.LengthMin, yamale.validators.constraints.LengthMax]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.regexes = [re.compile(r"^(?:[a-zA-Z](?:\w*[a-zA-Z0-9])?)(?:\.(?:[a-zA-Z](?:\w*[a-zA-Z0-9])?))*$")]
+
 class UuidValidator(yamale.validators.Regex):
     tag = 'uuid'
 
@@ -367,6 +375,7 @@ class UrlValidator(yamale.validators.Validator):
 
 _validators = yamale.validators.DefaultValidators
 _validators[NameValidator.tag] = NameValidator
+_validators[QualifiedNameValidator.tag] = QualifiedNameValidator
 _validators[UuidValidator.tag] = UuidValidator
 _validators[VersionValidator.tag] = VersionValidator
 _validators[UrlValidator.tag] = UrlValidator
@@ -534,6 +543,10 @@ def _load_optional(d, n, f=None, g=None):
         return g
     v = d[n]
     if isinstance(v,bool):
+        return v
+    if isinstance(v,int):
+        return v
+    if isinstance(v,str):
         return v
     if v is None or len(v) == 0:
         return g

@@ -1,5 +1,5 @@
 
-name: str()
+name: qualified_name()
 scope: enum('core','plugin','user_program')
 uuid: uuid(required=False)
 version: version(required=False)
