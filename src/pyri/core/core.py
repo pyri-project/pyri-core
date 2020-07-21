@@ -8,6 +8,7 @@ import importlib.resources as resources
 import asyncio
 import sanic
 import RobotRaconteur as RR
+import importlib.resources
 
 _pkg_name = 'pyri.core'
 
@@ -57,7 +58,11 @@ class PyriCore():
         serv_task = asyncio.ensure_future(serv_coro, loop=self._loop)
         self._sanic_server = await serv_task
         self._sanic_server.after_start()
-        self._sanic.add_route(self.http_route_root, "/")
+        from .. import webui
+        with importlib.resources.path(webui,"static") as webui_static_dir:
+            self._sanic.static("/", str(webui_static_dir))
+            self._sanic.static("/", os.path.join(str(webui_static_dir),"index.html"))
+
 
     async def _start_robotraconteur(self):
         
@@ -120,12 +125,24 @@ class PyriCore():
     async def stop_core(self):
         pass
 
-    async def http_route_root(self,request):
-        return sanic.response.text("Hello World!")
-
     def run(self):
         self._loop.run_until_complete(self.start_core())
         self._loop.run_forever()
+
+    def get_sanic(self):
+        return self._sanic
+
+    def get_robotraconteur(self):
+        return self._robotraconteur_node
+
+    def http_add_route(self, *args, **kwargs):
+        return self._sanic.add_route(*args, **kwargs)
+
+    def http_add_static(self, *args, **kwargs):
+        return self._sanic.static(*args, **kwargs)
+
+    def get_loop(self):
+        return self._loop
 
 def _get_default_config_dir():
     dirs = AppDirs("pyri", "pyri_project")
