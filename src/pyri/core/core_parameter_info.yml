@@ -12,16 +12,16 @@ parameters:
   - name: http_start
     description: Should http server start
     type_schema: bool(required=False)
-    default: true
+    default_value: true
   - name: robotraconteur_port
     description: Robot Raconteur server port
     type_schema: int(required=False)
-    default: 58653
+    default_value: 58653
   - name: robotraconteur_nodename
     description: The Robot Raconteur node name
     type_schema: str(required=False)
-    default: tech.pyri
+    default_value: tech.pyri
   - name: robotraconteur_options
     description: Robot Raconteur options in command line form
     type_schema: list(str(),required=False)
-    default: null
+    default_value: null
