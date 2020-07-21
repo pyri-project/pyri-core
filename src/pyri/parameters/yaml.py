@@ -22,7 +22,7 @@ from .parameters import ParameterVisibility, ParameterAccess, ParameterBucket, \
      ParameterBucketInfo, ParameterGroup, ParameterGroupInfo, \
      ParameterInfo, ParameterBucketScope, ParameterTypes
 
-_pkg_name = 'pyri.core.parameters'
+_pkg_name = 'pyri.parameters'
 
 class YamlGroupInfoWithSchema(NamedTuple):
     info: ParameterGroupInfo

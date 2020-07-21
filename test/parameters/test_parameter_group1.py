@@ -1,5 +1,5 @@
-from pyri.core.parameters import YamlParameterGroup, YamlGroupInfoWithSchema
-from pyri.core.parameters.yaml import _group_info_schema, _load_group_info
+from pyri.parameters import YamlParameterGroup, YamlGroupInfoWithSchema
+from pyri.parameters.yaml import _group_info_schema, _load_group_info
 import pkg_resources
 import os
 import pytest

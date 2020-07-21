@@ -1,4 +1,4 @@
-from pyri.core.parameters.yaml import _bucket_info_schema, _load_bucket_info
+from pyri.parameters.yaml import _bucket_info_schema, _load_bucket_info
 import yamale
 import pkg_resources
 

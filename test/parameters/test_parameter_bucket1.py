@@ -1,6 +1,6 @@
-from pyri.core.parameters import YamlParameterBucket
-from pyri.core.parameters import ParameterBucketScope
-from pyri.core.parameters.yaml import _group_info_schema, _load_group_info
+from pyri.parameters import YamlParameterBucket
+from pyri.parameters import ParameterBucketScope
+from pyri.parameters.yaml import _group_info_schema, _load_group_info
 import pkg_resources
 import os
 import pytest

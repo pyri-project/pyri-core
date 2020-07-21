@@ -1,4 +1,4 @@
-from pyri.core.parameters.yaml import _group_info_schema, _load_group_info
+from pyri.parameters.yaml import _group_info_schema, _load_group_info
 import yamale
 import pkg_resources
 
