@@ -7,6 +7,7 @@ from ..parameters import YamlParameterBucket, ParameterBucketScope
 import importlib.resources as resources
 import asyncio
 import sanic
+import RobotRaconteur as RR
 
 _pkg_name = 'pyri.core'
 
@@ -25,9 +26,11 @@ class PyriCore():
         self._start_http_ = False
         self._http_port = None
         self._robotraconteur_port = None
-        self._robotraconteur_node_name = None
+        self._robotraconteur_nodename = None
         self._sanic = None
         self._sanic_server = None
+        self._robotraconteur_node = None
+        self._robotraconteur_node_setup = None
 
         # The rest of the setup is done in start_core because async required
 
@@ -57,7 +60,62 @@ class PyriCore():
         self._sanic.add_route(self.http_route_root, "/")
 
     async def _start_robotraconteur(self):
-        pass
+        
+
+        self._robotraconteur_node = RR.RobotRaconteurNode()
+        self._robotraconteur_node.Init()
+
+        # TODO: Use robot raconteur stdrobdeflib
+
+        self._robotraconteur_node.RegisterServiceTypesFromFiles(
+            [
+                "com.robotraconteur.action",
+                "com.robotraconteur.actuator",
+                "com.robotraconteur.bignum",
+                "com.robotraconteur.color",
+                "com.robotraconteur.datatype",
+                "com.robotraconteur.datetime.clock",
+                "com.robotraconteur.datetime",
+                "com.robotraconteur.device",
+                "com.robotraconteur.eventlog",
+                "com.robotraconteur.geometry",
+                "com.robotraconteur.geometry.shapes",
+                "com.robotraconteur.geometryf",
+                "com.robotraconteur.geometryi",
+                "com.robotraconteur.gps",
+                "com.robotraconteur.hid.joystick",
+                "com.robotraconteur.identifier",
+                "com.robotraconteur.image",
+                "com.robotraconteur.imaging.camerainfo",
+                "com.robotraconteur.imaging",
+                "com.robotraconteur.imu",
+                "com.robotraconteur.laserscan",
+                "com.robotraconteur.laserscanner",
+                "com.robotraconteur.lighting",
+                "com.robotraconteur.octree",
+                "com.robotraconteur.param",
+                "com.robotraconteur.pid",
+                "com.robotraconteur.pointcloud",
+                "com.robotraconteur.pointcloud.sensor",
+                "com.robotraconteur.resource",
+                "com.robotraconteur.robotics.joints",
+                "com.robotraconteur.robotics.payload",
+                "com.robotraconteur.robotics.planning",
+                "com.robotraconteur.robotics.robot",
+                "com.robotraconteur.robotics.tool",
+                "com.robotraconteur.robotics.trajectory",
+                "com.robotraconteur.sensor",
+                "com.robotraconteur.sensordata",
+                "com.robotraconteur.servo",
+                "com.robotraconteur.signal",
+                "com.robotraconteur.units",
+                "com.robotraconteur.uuid"
+            ]
+        )
+        
+
+        self._robotraconteur_node_setup = RR.ServerNodeSetup(self._robotraconteur_nodename, 
+            self._robotraconteur_port, self._robotraconteur_node)
 
     async def stop_core(self):
         pass
