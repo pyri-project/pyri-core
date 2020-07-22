@@ -10,6 +10,7 @@ import sanic
 import RobotRaconteur as RR
 import importlib.resources
 from ..util import robotraconteur as rr_util
+from ..plugins.manager import PyriPluginManager
 
 _pkg_name = 'pyri.core'
 
@@ -34,6 +35,7 @@ class PyriCore():
         self._robotraconteur_node = None
         self._robotraconteur_node_setup = None
         self._robotraconteur_core = None
+        self._plugin_manager = None
 
         # The rest of the setup is done in start_core because async required
 
@@ -46,11 +48,22 @@ class PyriCore():
             self._http_port = await self._core_params.get_param_or_default("http_port")
         self._robotraconteur_port = await self._core_params.get_param_or_default("robotraconteur_port")
         self._robotraconteur_nodename = await self._core_params.get_param_or_default("robotraconteur_nodename")
+        self._plugin_blacklist = await self._core_params.get_param_or_default("plugin_blacklist", [])
+
+        await self._load_plugins()
 
         await self._start_robotraconteur()
         await self._start_http()
         
         
+    async def _load_plugins(self):
+        self._plugin_manager = PyriPluginManager(self)        
+        await self._plugin_manager.load_plugins(self._plugin_blacklist)
+
+        #TODO: remove print
+        plugins_info = await self._plugin_manager.get_plugins_info()
+        print(plugins_info)
+
     async def _start_http(self):
         if not self._start_http_:
             return
