@@ -9,6 +9,7 @@ import asyncio
 import sanic
 import RobotRaconteur as RR
 import importlib.resources
+from ..util import robotraconteur as rr_util
 
 _pkg_name = 'pyri.core'
 
@@ -32,6 +33,7 @@ class PyriCore():
         self._sanic_server = None
         self._robotraconteur_node = None
         self._robotraconteur_node_setup = None
+        self._robotraconteur_core = None
 
         # The rest of the setup is done in start_core because async required
 
@@ -66,61 +68,29 @@ class PyriCore():
 
     async def _start_robotraconteur(self):
         
+        from .rr import RRPyriCore
 
-        self._robotraconteur_node = RR.RobotRaconteurNode()
-        self._robotraconteur_node.Init()
+        self._robotraconteur_node = RR.RobotRaconteurNode.s
+        #self._robotraconteur_node.Init()
 
-        # TODO: Use robot raconteur stdrobdeflib
+        rr_util.register_standard_robdef(self._robotraconteur_node)
+        
+        from .. import core as core_pkg
 
-        self._robotraconteur_node.RegisterServiceTypesFromFiles(
+        rr_util.register_service_types_from_resources(
+            self._robotraconteur_node,
             [
-                "com.robotraconteur.action",
-                "com.robotraconteur.actuator",
-                "com.robotraconteur.bignum",
-                "com.robotraconteur.color",
-                "com.robotraconteur.datatype",
-                "com.robotraconteur.datetime.clock",
-                "com.robotraconteur.datetime",
-                "com.robotraconteur.device",
-                "com.robotraconteur.eventlog",
-                "com.robotraconteur.geometry",
-                "com.robotraconteur.geometry.shapes",
-                "com.robotraconteur.geometryf",
-                "com.robotraconteur.geometryi",
-                "com.robotraconteur.gps",
-                "com.robotraconteur.hid.joystick",
-                "com.robotraconteur.identifier",
-                "com.robotraconteur.image",
-                "com.robotraconteur.imaging.camerainfo",
-                "com.robotraconteur.imaging",
-                "com.robotraconteur.imu",
-                "com.robotraconteur.laserscan",
-                "com.robotraconteur.laserscanner",
-                "com.robotraconteur.lighting",
-                "com.robotraconteur.octree",
-                "com.robotraconteur.param",
-                "com.robotraconteur.pid",
-                "com.robotraconteur.pointcloud",
-                "com.robotraconteur.pointcloud.sensor",
-                "com.robotraconteur.resource",
-                "com.robotraconteur.robotics.joints",
-                "com.robotraconteur.robotics.payload",
-                "com.robotraconteur.robotics.planning",
-                "com.robotraconteur.robotics.robot",
-                "com.robotraconteur.robotics.tool",
-                "com.robotraconteur.robotics.trajectory",
-                "com.robotraconteur.sensor",
-                "com.robotraconteur.sensordata",
-                "com.robotraconteur.servo",
-                "com.robotraconteur.signal",
-                "com.robotraconteur.units",
-                "com.robotraconteur.uuid"
+                (core_pkg,"tech.pyri.core")
             ]
         )
-        
 
         self._robotraconteur_node_setup = RR.ServerNodeSetup(self._robotraconteur_nodename, 
             self._robotraconteur_port, self._robotraconteur_node)
+
+        self._robotraconteur_core = RRPyriCore(self)
+        
+        self._robotraconteur_node.RegisterService("pyri", "tech.pyri.core.PyriCore", self._robotraconteur_core)
+        
 
     async def stop_core(self):
         pass
@@ -154,7 +124,13 @@ def main():
 
     parser = argparse.ArgumentParser(description="Pyri Teach Pendant Core Runtime")
     parser.add_argument("--config-dir", type=str, default=None, help="configuration directory")
+    parser.add_argument("--wait-debugger", action="store_true", help=argparse.SUPPRESS)
 
     args = parser.parse_args()
+
+    if args.wait_debugger:
+        print("PyRI PID: {}".format(os.getpid()))
+        input("Press enter to continue")
+
     pyri_core = PyriCore(args.config_dir)
     pyri_core.run()

@@ -1,0 +1,9 @@
+service tech.pyri.core
+
+import com.robotraconteur.device
+
+using com.robotraconteur.device.DeviceInfo
+
+object PyriCore
+    property DeviceInfo device_info [readonly,nolock]
+end
