@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, find_namespace_packages
 
 setup(
     name='pyri-core',
@@ -8,7 +8,7 @@ setup(
     author_email='wason@wasontech.com',
     url='http://pyri.tech',
     package_dir={'': 'src'},
-    packages=find_packages(where='src'),
+    packages=find_namespace_packages(where='src'),
     include_package_data=True,
     zip_safe=False,
     install_requires=[
