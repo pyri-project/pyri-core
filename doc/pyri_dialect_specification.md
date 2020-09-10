@@ -186,6 +186,16 @@ Starred operations introduce unnecessary complexity for PyRI.
 * RestrictedPython: Allowed
 * PyRI: Allowed
 
+#### UnaryOp
+
+* RestrictedPython: Allowed
+* **PyRI: Restricted**
+
+Operator overloads are not redirected by PyRI. To guard against unintentional use, the fence function
+`_check_unary_op_allowed_()` is called on all arguments before the operator is used. The
+guard function `_check_return_value_()` is used on the return value to check the return
+from the function.
+
 #### UAdd
 
 * RestrictedPython: Allowed
@@ -209,7 +219,12 @@ Starred operations introduce unnecessary complexity for PyRI.
 #### BinOp
 
 * RestrictedPython: Allowed
-* PyRI: Allowed
+* **PyRI: Restricted**
+
+Operator overloads are not redirected by PyRI. To guard against unintentional use, the fence function
+`_check_binary_op_allowed_()` is called on all arguments before the operator is used. The
+guard function `_check_return_value_()` is used on the return value to check the return
+from the function.
 
 #### Add
 
@@ -279,7 +294,12 @@ Starred operations introduce unnecessary complexity for PyRI.
 #### BoolOp
 
 * RestrictedPython: Allowed
-* PyRI: Allowed
+* **PyRI: Restricted**
+
+Operator overloads are not redirected by PyRI. To guard against unintentional use, the fence function
+`_check_bool_op_allowed_()` is called on all arguments before the operator is used. The
+guard function `_check_return_value_()` is used on the return value to check the return
+from the function.
 
 #### And
 
@@ -294,7 +314,12 @@ Starred operations introduce unnecessary complexity for PyRI.
 #### Compare
 
 * RestrictedPython: Allowed
-* PyRI: Allowed
+* **PyRI: Restricted**
+
+Operator overloads are not redirected by PyRI. To guard against unintentional use, the fence function
+`_check_compare_allowed_()` is called on all arguments before the operator is used. The
+guard function `_check_return_value_()` is used on the return value to check the return
+from the function.
 
 #### Eq
 
@@ -361,8 +386,11 @@ The name of the function being called is checked by the "Name" node.
 
 PyRI allows for calling two special functions to track blockly execution:
 
-* __begin_blockly_statement
-* __end_blockly_statement
+* _begin_blockly_statement_
+* _end_blockly_statement_
+
+The guard function `_check_return_value_()` is used on the return value to check the return
+from the function.
 
 #### keyword
 
@@ -379,9 +407,15 @@ PyRI allows for calling two special functions to track blockly execution:
 * RestrictedPython: Restricted
 * **PyRI: Restricted**
 
-Attribute access to objects is redirected to the guarded functions `_getattr_` and `_write_`.  Access to attributes starting with underscore "_" or ending with "\_\_roles\_\_" is denied. PyRI implements these guarded functions to protect data within plugin objects.
+Attribute access to objects is redirected to the guarded functions `_getattr_` and `_write_`.  Access to attributes starting with underscore "_" or ending with "\_\_roles\_\_" is denied. PyRI implements these guarded functions to protect data within plugin objects. PyRI also overrides the `Store` operation to use `_pyri_setattr_wrapper_`. This
+guard is a small class that dispatches the `setattr` operation to the
+correct PyRI object handler.
 
-#### Subscripting
+The guard function `_check_return_value_()` is used on the return value.
+
+### Subscripting
+
+#### Subscript
 
 * RestrictedPython: Restricted
 * **PyRI: Restricted**
@@ -406,7 +440,9 @@ RestrictedPython by default transforms subscript operations to use `_getitem_` a
 
         <function implementation>
 
-PyRI uses these same transformations, and implements `_getitem_` and `_write_` to protect builtin and plugin objects.
+PyRI uses these same `_getitem_` transformation, but uses a `_setitem_` transformation as instead of `_write_`. This redirects the set calls to PyRI specific functions. For `del` operations, this node will be transformed by `Delete` so is left unmodified.
+
+The guard function `_check_return_value_()` is used on the return value.
 
 #### Index
 
@@ -473,6 +509,10 @@ RestrictedPython modifies assign operations to guard unpacking tuples using the 
 
 PyRI adds more restrictions to assignments. Builtins and plugin objects must not be assigned. Also, module global scope variables must not be assigned. The global scope is never executed, so it must not be used.
 
+Multiple assignment is disabled for simplicity.
+
+The guard function `_check_assign_name_()` is used to prevent overwriting global variables.
+
 #### AnnAssign
 
 * RestrictedPython: Denied
@@ -481,9 +521,9 @@ PyRI adds more restrictions to assignments. Builtins and plugin objects must not
 #### AugAssign
 
 * RestrictedPython: Restricted
-* PyRI: Restricted
+* PyRI: **Denied**
 
-AugAssign is forbidden for Attribute and SubScript. Augmented assignment of names is modified to use the `_inplacevar_` guard function.
+AugAssign is not allowed in PyRI. It adds significant complexity to the interpreter, and most industial programming languages don't support it.
 
 #### Raise
 
@@ -538,9 +578,9 @@ Check to prevent overwriting guard functions. Disallow "*" import.
 #### For
 
 * RestrictedPython: Allowed
-* PyRI: Allowed
+* PyRI: **Restricted**
 
-Note that names and assignments are checked by the Name and Assign nodes.
+The guard function `_check_assign_name_()` is used to prevent overwriting global variables.
 
 #### While
 
@@ -560,21 +600,16 @@ Note that names and assignments are checked by the Name and Assign nodes.
 #### Try
 
 * RestrictedPython: Allowed
-* PyRI: Allowed
+* PyRI: **Restricted**
 
-#### ExceptHandler
-
-* RestrictedPython: Restricted
-* *PyRI: Restricted*
-
-Unpacking of tuples is guarded using `_getiter_` and name of exception variable is checked. PyRI does additional checks on exception variable to prevent overwriting builtins or plugin objects.
+The guard function `_check_assign_name_()` is used to prevent overwriting global variables when catching exceptions.
 
 #### With
 
 * RestrictedPython: Restricted
-* PyRI: Restricted
+* PyRI: **Restricted**
 
-Tuple unpacking is guarded with `_getiter_` guard function. PyRI does additional check on with variable to prevent overwriting builtins or plugin objects.
+Tuple unpacking is guarded with `_getiter_` guard function. The guard function `_check_assign_name_()` is used to prevent overwriting global variables.
 
 #### withitem
 
@@ -631,7 +666,7 @@ Generators introduce unnecessary complexity for PyRI.
 #### Global
 
 * RestrictedPython: Allowed
-* **PyRI: Redefined**
+* **PyRI: Denied**
 
 PyRI has its own concept of "global" variables. PyRI redirects global variables to use the program global variable table.
 
@@ -648,6 +683,9 @@ PyRI has its own concept of "global" variables. PyRI redirects global variables 
 Classes introduce unnecessary complexity for PyRI. Plugins are able to define classes that are made available for use in the PyRI sandbox.
 
 ### Async and await
+
+* RestrictedPython: Denied
+* PyRI: Denied
 
 Async and await is denied in RestrictedPython and PyRI
 
@@ -706,7 +744,7 @@ The previous section defines the policy of each AST Node type. While precise, th
 8. Comprehensions of all types are denied
 9. Assignment is restricted. Bultins and plugin objects may not be overwritten. The guard function `_getiter_` is used for tuple expansion.
 10. Annotation assignment is denied
-11. Augmentation assignment is denied for all but names. The `_inplacevar_` guard function is used for augmentation assign
+11. Augmentation assignment is denied
 12. Deletion is denied for variables, but allowed for sequence and plugin objects
 13. Imports are restricted to a safe subset of the standard library and plugins
 14. Exception handlers prevent overwriting builtins and plugin names, tuple expansion is protected with `_getiter_` guard function
@@ -715,13 +753,16 @@ The previous section defines the policy of each AST Node type. While precise, th
 17. Inner functions and closures are denied
 18. Lambda functions are denied
 19. Yield, yield from, and generators are denied
-20. Global is redefined for use with PyRI global table
+20. Global is denied
 21. Nonlocal is denied
 22. Class and metaclass definitions are denied
 23. Async, await, async for, and async with are denied
 24. Expression and Interactive top level nodes are denied
 25. Global module scope for all but functions is denied because module scope is never executed
 26. Ellipsis (...) is denied
+27. Accessing operators uses guard functions to prevent unintential use by the sandbox
+28. Accessing attributes uses guards to protect classes that are not intended to be used by the sandbox
+29. Objects can optionally redirect attribute calls to `_pyri_getattr_` and `_pyri_setattr_`
 
 ## Safe builtins and modules
 

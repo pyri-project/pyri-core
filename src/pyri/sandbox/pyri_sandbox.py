@@ -1,9 +1,15 @@
 
 
 import re
-from RestrictedPython import compile_restricted, safe_globals
+from RestrictedPython import compile_restricted
+
+import copy
 
 _valid_name_re = re.compile('[a-zA-Z][a-zA-Z0-9_]*')
+
+safe_builtins = copy.deepcopy(safe_builtins_zope)
+
+
 
 class PrintCollector:
     def __init__(self):
@@ -31,9 +37,10 @@ class PyriSandbox():
         loc = {}
         
         byte_code = compile_restricted(script_src, '<robotraconteur_sandbox>', 'exec')
-        sandbox_globals = safe_globals.copy()
+        sandbox_globals = {'__builtins__': safe_builtins}
         print_collector = PrintCollector()
         sandbox_globals["_print_"] =print_collector
+        sandbox_globals["_write_"] = full_write_guard
         exec(byte_code, sandbox_globals, loc)
         if params is None:
             res = loc[function_name]()
