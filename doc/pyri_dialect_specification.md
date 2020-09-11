@@ -623,7 +623,7 @@ Tuple unpacking is guarded with `_getiter_` guard function. The guard function `
 * RestrictedPython: Restricted
 * **PyRI: Restricted**
 
-FunctionDef nodes are restricted in the following ways in RestrictedPython: Function name is checked, argument names are checked, print collector is injected, and tuple argument (star syntax) unpacking is protected. The name restrictions follow the same rules as the Name node. 
+FunctionDef nodes are restricted in the following ways in RestrictedPython: Function name is checked, argument names are checked, print collector is injected, and tuple argument (star syntax) unpacking is protected. The name restrictions follow the same rules as the Name node.
 
 PyRI expands on the restrictions of RestrictedPython by preventing star notation for arguments, preventing redefining builtin or plugin object names, and preventing nested functions. Functions must be defined at the module level.
 

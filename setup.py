@@ -20,7 +20,7 @@ setup(
         'RestrictedPython',
         'appdirs'
     ],
-    tests_require=['pytest','pytest-asyncio'],
+    tests_require=['pytest','pytest-asyncio','astor','astdiff'],
     extras_require={
         'test': ['pytest','pytest-asyncio']
     },

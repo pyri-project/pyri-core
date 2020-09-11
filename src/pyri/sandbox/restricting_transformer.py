@@ -2,8 +2,8 @@ from RestrictedPython.transformer import RestrictingNodeTransformer, ALLOWED_FUN
 import ast
 
 class PyriRestrictingNodeTransformer(RestrictingNodeTransformer):
-    def __init__(self, errors=None, warnings=None):
-        super().__init__(errors,warnings)
+    def __init__(self, errors=None, warnings=None, used_names=None):
+        super().__init__(errors,warnings,used_names)
 
         self.print_info.printed_used=True
         self.print_info.print_used=True
@@ -179,7 +179,7 @@ class PyriRestrictingNodeTransformer(RestrictingNodeTransformer):
         # Temporarily change name so name checks are passed
         old_func_id = node.func.id
         node.func.id = "special_placeholder"
-        ret_node = super.visit_Call(node)
+        ret_node = super().visit_Call(node)
         ret_node.func.id = old_func_id
 
         return self.check_return_value(node,ret_node)
@@ -304,7 +304,7 @@ class PyriRestrictingNodeTransformer(RestrictingNodeTransformer):
             
             for n in names:
                 new_node = ast.Expr(
-                    value = ast.Call(func=ast.Name('_check_assign_name_'),
+                    value = ast.Call(func=ast.Name('_check_assign_name_', ast.Load()),
                         args=[ast.Constant(value=n)],
                         keywords=[]
                     )
@@ -361,7 +361,7 @@ class PyriRestrictingNodeTransformer(RestrictingNodeTransformer):
             
             for n in names:
                 new_node = ast.Expr(
-                    value = ast.Call(func=ast.Name('_check_assign_name_'),
+                    value = ast.Call(func=ast.Name('_check_assign_name_', ast.Load()),
                         args=[ast.Constant(value=n)],
                         keywords=[]
                     )
@@ -388,7 +388,7 @@ class PyriRestrictingNodeTransformer(RestrictingNodeTransformer):
 
             n = ret_node.items[0].optional_vars.id            
             new_node = ast.Expr(
-                value = ast.Call(func=ast.Name('_check_assign_name_'),
+                value = ast.Call(func=ast.Name('_check_assign_name_', ast.Load()),
                     args=[ast.Constant(value=n)],
                     keywords=[]
                 )
@@ -405,6 +405,11 @@ class PyriRestrictingNodeTransformer(RestrictingNodeTransformer):
         """
         Don't allow nested functions
         """
+
+        arg = node.args
+        if arg.vararg is not None or arg.kwarg is not None \
+            or len(arg.posonlyargs) != 0 or len(arg.kwonlyargs) != 0:
+            self.error(node, '*args and *kwargs are not allowed')
 
         ret_node = super().visit_FunctionDef(node)
 

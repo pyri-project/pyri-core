@@ -1,0 +1,9 @@
+def testfunc():
+    a = b.c
+    a = b.c.d
+    a = b.c[e]
+    a = b.c[e].d
+    b.c = a
+    b.c.d = a
+    b.c[e] = a
+    b.c[e].d = a

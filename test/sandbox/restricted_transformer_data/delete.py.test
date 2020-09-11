@@ -1,0 +1,13 @@
+def testfunc():
+    del b.c
+    del b.c.d
+    del b.c[e]
+    del b.c[e].d
+    del b[10]
+    del b[1:10:2]
+    del b[1:-1:10]
+    del b.c[10]
+    del b.c[10:20].d
+    del b.c[e]
+    del b.c[e:1,10:20].d
+    

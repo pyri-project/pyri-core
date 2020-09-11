@@ -1,0 +1,6 @@
+def myfunc():
+    for a in b:
+        pass
+
+    for a, (b,c, (d, (e,f))) in b:
+        pass

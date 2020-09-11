@@ -1,0 +1,4 @@
+def myfunc():
+    with a as b:
+        pass
+

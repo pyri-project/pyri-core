@@ -1,0 +1,17 @@
+def myfunc():
+    try:
+        pass
+    except Exception:
+        pass
+
+    try:
+        pass
+    except:
+        pass
+
+    try:
+        pass
+    except Exception as a:
+        pass
+    except OtherException as b:
+        pass
