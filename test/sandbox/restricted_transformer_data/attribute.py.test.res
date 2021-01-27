@@ -1,6 +1,3 @@
-_print = _print_(_getattr_)
-
-
 def testfunc():
     _check_assign_name_('a')
     a = _check_return_(_getattr_(b, 'c'))

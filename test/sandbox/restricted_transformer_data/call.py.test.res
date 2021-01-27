@@ -1,6 +1,3 @@
-_print = _print_(_getattr_)
-
-
 def myfunc():
     _check_return_(a())
     _check_return_(a(b, c))

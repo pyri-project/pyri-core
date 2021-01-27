@@ -1,6 +1,3 @@
-_print = _print_(_getattr_)
-
-
 def myfunc():
     try:
         pass

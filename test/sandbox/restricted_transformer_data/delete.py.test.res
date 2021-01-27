@@ -1,6 +1,3 @@
-_print = _print_(_getattr_)
-
-
 def testfunc():
     del _write_(b).c
     del _write_(_check_return_(_getattr_(b, 'c'))).d
