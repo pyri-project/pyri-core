@@ -776,9 +776,139 @@ RestrictedPython provides a set of [three builtin groups](https://restrictedpyth
 
 The PyRI restricted Python dialect provides `safe_builtins` and `limited_builtins` for the user. The base sandbox has limited functionality, with all standard library and utility functions provided by plugins.
 
-### Guard Functions
+## Guard Functions
 
 RestrictedPython modifies the AST to add "guard functions" to certain unsafe operations. These guard functions are designed to prevent unsafe behavior, or behavior that is confusing to novice users. PyRI modifies these guard functions to allow plugin objects to be accessed safely. See the plugin object section for more details.
+
+### Constants
+
+* `None`
+* `False`
+* `True`
+
+### Types
+
+* `bool`
+* `int`
+* `float`
+* `complex`
+* `bytearray`
+* `set`
+* `frozenset`
+* `list`
+* `dict`
+* `str`
+* `tuple`
+* `iter`
+* `string` (module)
+
+### Conversion
+
+* `oct`
+* `ord`
+* `hex`
+* `chr`
+* `repr`
+
+### Math
+
+* `sum`
+* `max`
+* `min`
+* `abs`
+* `pow`
+* `round`
+* `math` (module)
+* `random` (module)
+* `divmod`
+
+### Logical
+
+* `all`
+* `any`
+
+### Object
+
+* `hash`
+* `id`
+* `setattr`
+* `delattr`
+* `getattr`
+* `hasattr`
+* `len`
+
+### Utility
+
+* `range`
+* `slice`
+* `zip`
+
+### Reflection
+
+* `callable`
+* `isinstance`
+* `issubclass`
+
+### Exceptions
+
+* `ArithmeticError`
+* `AssertionError`
+* `AttributeError`
+* `BaseException`
+* `BufferError`
+* `BytesWarning`
+* `DeprecationWarning`
+* `EOFError`
+* `EnvironmentError`
+* `Exception`
+* `FloatingPointError`
+* `FutureWarning`
+* `GeneratorExit`
+* `IOError`
+* `ImportError`
+* `ImportWarning`
+* `IndentationError`
+* `IndexError`
+* `KeyError`
+* `KeyboardInterrupt`
+* `LookupError`
+* `MemoryError`
+* `NameError`
+* `NotImplementedError`
+* `OSError`
+* `OverflowError`
+* `PendingDeprecationWarning`
+* `ReferenceError`
+* `RuntimeError`
+* `RuntimeWarning`
+* `StopIteration`
+* `SyntaxError`
+* `SyntaxWarning`
+* `SystemError`
+* `SystemExit`
+* `TabError`
+* `TypeError`
+* `UnboundLocalError`
+* `UnicodeDecodeError`
+* `UnicodeEncodeError`
+* `UnicodeError`
+* `UnicodeTranslateError`
+* `UnicodeWarning`
+* `UserWarning`
+* `ValueError`
+* `Warning`
+* `ZeroDivisionError`
+
+### PyRI Access Guards
+
+* `_getattr_`
+* `_getitem_`
+* `_check_return_`
+* `_check_unary_op_allowed_`
+* `_check_binary_op_allowed_`
+* `_check_bool_op_allowed_`
+* `_check_compare_allowed_`
+* `_check_assign_name_`
 
 ## User-defined data types
 

@@ -5,10 +5,12 @@ class PyriRestrictingNodeTransformer(RestrictingNodeTransformer):
     def __init__(self, errors=None, warnings=None, used_names=None):
         super().__init__(errors,warnings,used_names)
 
-        self.print_info.printed_used=True
-        self.print_info.print_used=True
-        
         self.special_functions = ["_begin_blockly_statement_","_end_blockly_statement_"]
+
+    def inject_print_collector(self, node, position=0):
+        if self.print_info.print_used and not self.print_info.printed_used:
+            self.print_info.printed_used = True
+        super().inject_print_collector(node,position)
 
     def check_name(self, node, name, allow_magic_methods=False):
         super().check_name(node,name,allow_magic_methods)

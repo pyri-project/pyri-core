@@ -1,7 +1,10 @@
-from RestrictedPython.Guards import safe_builtins as rp_safe_builtins
+from RestrictedPython.Guards import safe_builtins as safe_builtins_zope, guarded_iter_unpack_sequence
 from RestrictedPython.Utilities import utility_builtins
 import copy
 import builtins
+import math
+import random
+import string
 
 # TODO: Do implicit conversions and iterators need to be guarded? Currently unguarded
 
@@ -17,18 +20,22 @@ _pyri_safe_names = [
     'sum',
     'all',
     'any',
-    'set',
-    'bytearray'
+    'bytearray',
+    'bytes'
 ]
 
 class PyriGuards:
     def __init__(self):
-        self.safe_builtins = copy.deep_copy(rp_safe_builtins)
+        self.safe_builtins = copy.deepcopy(safe_builtins_zope)
 
         for name in _pyri_safe_names:
             self.safe_builtins[name] = getattr(builtins, name)
 
-        self.safe_builtins.extend(utility_builtins)        
+        self.safe_builtins.update(utility_builtins)   
+        del self.safe_builtins['whrandom']
+        del self.safe_builtins['same_type']
+        del self.safe_builtins['test']
+        del self.safe_builtins['reorder']
 
         self.safe_builtins['setattr'] = self.guarded_setattr
         self.safe_builtins['delattr'] = self.guarded_delattr
@@ -36,18 +43,22 @@ class PyriGuards:
         self.safe_builtins['getattr'] = self.guarded_getattr
         self.safe_builtins['hasattr'] = self.guarded_hasattr
         self.safe_builtins['_getitem_'] = self.guarded_getitem
+        self.safe_builtins['_getiter_'] = self.guarded_getiter
+        self.safe_builtins['_write_'] = self.full_write_guard()
         self.safe_builtins['_check_return_'] = self.check_return
         self.safe_builtins['_check_unary_op_allowed_'] = self.check_unary_op_allowed
         self.safe_builtins['_check_binary_op_allowed_'] = self.check_binary_op_allowed
         self.safe_builtins['_check_bool_op_allowed_'] = self.check_bool_op_allowed
+        self.safe_builtins['_check_compare_allowed_'] = self.check_compare_allowed
+        self.safe_builtins['_iter_unpack_sequence_'] = guarded_iter_unpack_sequence
         del self.safe_builtins["__build_class__"]
                 
-        self.safetypes = {dict, list, int, float, complex, str, set, bytearray}
+        self.safetypes = {dict, list, int, float, complex, str, set, frozenset, bool, bytes, bytearray, tuple,math,random,string}
 
     def _is_safe(self, ob):
         # Don't bother wrapping simple types, or objects that claim to
         # handle their own write security.
-        return type(ob) in self.safetypes or hasattr(ob, '_pyri_object')
+        return ob is None or type(ob) in self.safetypes or ob in self.safetypes or hasattr(ob, '_pyri_object')
 
     # Taken from RestrictedPython _full_write_guard, modified for use here
     def _write_wrapper(self):
@@ -84,10 +95,10 @@ class PyriGuards:
         return Wrapper
 
     # Taken from RestrictedPython _full_write_guard, modified for use here
-    def _full_write_guard(self):
+    def full_write_guard(self):
         # Nested scope abuse!
         # safetypes and Wrapper variables are used by guard()
-        Wrapper = _write_wrapper()
+        Wrapper = self._write_wrapper()
 
         def guard(ob):
             if self._is_safe(ob):
@@ -166,6 +177,10 @@ class PyriGuards:
 
         return f(index)
 
+    def guarded_getiter(self,ob):
+        # No retrictions
+        return ob
+
     def check_return(self, val):
         return val
 
@@ -190,6 +205,13 @@ class PyriGuards:
             return ob
         raise TypeError('object does not support boolean operators')
 
+    def check_compare_allowed(self, ob):
+        if self._is_safe(ob):
+            return ob
+        if hasattr(ob, '_pyri_compare_op_'):
+            return ob
+        raise TypeError('object does not support compare')
+
 
 def get_pyri_bultins():
     guards = PyriGuards()
@@ -210,9 +232,9 @@ def append_assign_name_guard(builtins_, extra_protected_names):
             names.append(n)
 
     names.extend(extra_protected_names)
-    builtins['_check_assign_name_'] = get_assign_name_guard(names)
+    builtins_['_check_assign_name_'] = get_assign_name_guard(names)
     return builtins_
 
-def get_pyri_builtins_with_extra_protected_names(extra_protected_names):
+def get_pyri_builtins_with_name_guard(extra_protected_names = []):
     builtins_ = get_pyri_bultins()
-    return append_assign_name_guard(extra_protected_names)
+    return append_assign_name_guard(builtins_, extra_protected_names)

@@ -1,0 +1,6 @@
+def test_constants():
+    assert True != False
+    a = None
+    assert a is None
+    b = 1
+    assert b is not None
