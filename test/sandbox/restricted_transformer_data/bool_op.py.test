@@ -1,5 +1,0 @@
-def myfunc():
-    a = b and c
-    a = b or c
-
-    a = (b and c) or (e and (f or g))

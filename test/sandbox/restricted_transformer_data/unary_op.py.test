@@ -1,6 +1,0 @@
-def myfunc():
-    a = 1
-    b = +a
-    b = -a
-    b = ~a
-    b = not a

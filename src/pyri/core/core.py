@@ -9,7 +9,7 @@ import asyncio
 import sanic
 import RobotRaconteur as RR
 import importlib.resources
-from ..util import robotraconteur as rr_util
+from RobotRaconteurCompanion.Util import RobDef as rr_util
 from ..plugins.manager import PyriPluginManager
 
 _pkg_name = 'pyri.core'
