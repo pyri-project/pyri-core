@@ -128,7 +128,7 @@ class PyriCore():
         return self._loop
 
 def _get_default_config_dir():
-    dirs = AppDirs("pyri", "pyri_project")
+    dirs = AppDirs("pyri", "pyri-project")
     config_dir = Path(dirs.user_data_dir).joinpath("config")
     return config_dir
 
