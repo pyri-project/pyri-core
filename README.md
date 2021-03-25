@@ -17,7 +17,7 @@ PyRI currently consists of the following components:
 Additional developer tools:
 
 * `pyri-example-plugin`: https://github.com/pyri-project/pyri-example-plugin
-* `pyri-scratch`: https://github.com/johnwason/pyri-scratch (scratchpad scripts and examples to trial components)
+* `pyri-scripts`: https://github.com/johnwason/pyri-scripts (development scripts and examples to trial components)
 
 ## Plugin Architecture
 
