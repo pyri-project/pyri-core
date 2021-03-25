@@ -1,0 +1,45 @@
+# This file will clone all PyRI repositories
+# Use vcstool with command:
+#
+#    vcs import < pyri.repos
+#    vcs update
+
+repositories:
+  pyri-common:
+    type: git
+    url: https://github.com/pyri-project/pyri-common
+
+  pyri-variable-storage:
+    type: git
+    url: https://github.com/pyri-project/pyri-variable-storage
+
+  pyri-device-manager:
+    type: git
+    url: https://github.com/pyri-project/pyri-device-manager
+
+  pyri-sandbox:
+    type: git
+    url: https://github.com/pyri-project/pyri-sandbox
+
+  pyri-webui-server:
+    type: git
+    url: https://github.com/pyri-project/pyri-webui-server
+
+  pyri-core:
+    type: git
+    url: https://github.com/pyri-project/pyri-core
+
+  pyri-robotics:
+    type: git
+    url: https://github.com/pyri-project/pyri-robotics
+
+  pyri-example-plugin:
+    type: git
+    url: https://github.com/pyri-project/pyri-example-plugin
+
+  scripts:
+    type: git
+    url: https://github.com/johnwason/pyri-scripts
+
+
+    
