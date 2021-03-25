@@ -16,7 +16,7 @@ repositories:
     type: git
     url: https://github.com/pyri-project/pyri-device-manager
 
-    pyri-devices-states:
+  pyri-devices-states:
     type: git
     url: https://github.com/pyri-project/pyri-devices-states
 
