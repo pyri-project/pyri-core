@@ -28,6 +28,10 @@ repositories:
     type: git
     url: https://github.com/pyri-project/pyri-webui-server
 
+  pyri-webui-browser:
+    type: git
+    url: https://github.com/pyri-project/pyri-webui-browser
+
   pyri-core:
     type: git
     url: https://github.com/pyri-project/pyri-core
