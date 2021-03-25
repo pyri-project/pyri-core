@@ -2,7 +2,6 @@
 # Use vcstool with command:
 #
 #    vcs import < pyri.repos
-#    vcs update
 
 repositories:
   pyri-common:

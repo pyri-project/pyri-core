@@ -19,6 +19,10 @@ Additional developer tools:
 * `pyri-example-plugin`: https://github.com/pyri-project/pyri-example-plugin
 * `pyri-scripts`: https://github.com/johnwason/pyri-scripts (development scripts and examples to trial components)
 
+To clone all repositories for PyRI using vcstool run:
+
+    vcs import --input https://raw.githubusercontent.com/pyri-project/pyri-core/master/pyri.repos
+
 ## Plugin Architecture
 
 PyRI uses setuptools `entry_points` to add plugins. See https://packaging.python.org/guides/creating-and-discovering-plugins/#using-package-metadata for an overview of how `entry_points` can be used to create and discover plugins.
