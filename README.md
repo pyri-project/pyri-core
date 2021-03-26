@@ -2,6 +2,57 @@
 
 **WARNING: THIS REPOSITORY CONTAINS UNFINISHED SOFTWARE**
 
+## Development Workspace Configuration
+
+### Windows
+
+#### Preparation
+
+Begin by downloading and installing the latest Python version from: https://www.python.org/downloads/ PyRI requires Python 3.8 or greater.
+
+Download and install Git from https://git-scm.com/download/win
+
+Next, install vstools by running the following command:
+
+    python -m pip install vcstools
+
+It may be necessary to run this command using an administrative command prompt https://www.isunshare.com/windows-10/2-ways-to-run-command-prompt-as-administrator-in-win-10.html
+
+Download and install  NodeJS LTS and NPM from https://nodejs.org/en/download/ This is necessary for the Blockly compiler.
+
+Download and install Visual Studio 2019 Community https://visualstudio.microsoft.com/downloads/ Make sure to select the C++ and Python workload https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=msvc-160
+
+Install the Windows Terminal https://docs.microsoft.com/en-us/windows/terminal/get-started
+
+#### Clone and initialize
+
+Create a new directory to hold the files. Change to that directory in a command prompt, and run:
+
+    vcs import --input https://raw.githubusercontent.com/pyri-project/pyri-core/master/pyri.repos
+    cd scripts
+    create_python_venv
+    init_workspace_packages
+
+#### Run PyRI and initialize default devices
+
+Create a terminal, and change to the `scripts` directory. Run to start all services in tabs in the terminal:
+
+    run_all
+
+Add default devices. This only has to be done once:
+
+    add_default_devices
+
+Now, open firefox and go to http://localhost:8000 The PyRI WebUI will start.
+
+#### Run PyRI
+
+To run PyRI, change to the `scripts` directory and run `run_all`. Navigate to http://localhost:8000 with firefox
+
+#### Debugging with VS Code
+
+PyRI can be debugged with VS Code. Be sure to select the Python interpreter in `venv\Scripts\python` using the `Select Python Interpreter` task https://code.visualstudio.com/docs/python/environments Use the `launch.json` file in the `scripts` directory to configure the launch profiles for the PyRI service nodes.
+
 ## PyRI Components
 
 PyRI currently consists of the following components:
