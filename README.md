@@ -53,6 +53,44 @@ To run PyRI, change to the `scripts` directory and run `run_all`. Navigate to ht
 
 PyRI can be debugged with VS Code. Be sure to select the Python interpreter in `venv\Scripts\python` using the `Select Python Interpreter` task https://code.visualstudio.com/docs/python/environments Use the `launch.json` file in the `scripts` directory to configure the launch profiles for the PyRI service nodes.
 
+### Linux
+
+#### Preparation
+
+Ubuntu 20.04 or greater required. Run the following:
+
+    sudo apt install python3-pip python3-venv
+
+Install the Node.js version 14.x
+
+    curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+
+Create a new directory to hold the files. Change to that directory in a command prompt, and run:
+
+    vcs import --input https://raw.githubusercontent.com/pyri-project/pyri-core/master/pyri.repos
+    cd scripts
+    ./create_python_venv
+    wget -P ~/Downloads https://github.com/robotraconteur/robotraconteur/releases/download/v0.15.1/RobotRaconteur-0.15.1-cp38-cp38-linux_x86_64.whl
+    ../venv/bin/python -m pip install ~/Downloads/RobotRaconteur-0.15.1-cp38-cp38-linux_x86_64.whl
+    ./init_workspace_packages
+
+#### Run PyRI and initialize default devices
+
+Create a terminal, and change to the `scripts` directory. Run to start all services in tabs in the terminal:
+
+    ./run_all
+
+Add default devices. This only has to be done once:
+
+    ./add_default_devices
+
+Now, open firefox and go to http://localhost:8000 The PyRI WebUI will start.
+
+#### Run PyRI
+
+To run PyRI, change to the `scripts` directory and run `./run_all`. Navigate to http://localhost:8000 with firefox
+
 ## PyRI Components
 
 PyRI currently consists of the following components:
