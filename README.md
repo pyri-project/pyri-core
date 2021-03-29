@@ -14,7 +14,7 @@ Download and install Git from https://git-scm.com/download/win
 
 Next, install vstools by running the following command:
 
-    python -m pip install vcstools
+    python -m pip install vcstool
 
 It may be necessary to run this command using an administrative command prompt https://www.isunshare.com/windows-10/2-ways-to-run-command-prompt-as-administrator-in-win-10.html
 
@@ -61,13 +61,19 @@ Ubuntu 20.04 or greater required. Run the following:
 
     sudo apt install python3-pip python3-venv
 
+Next, install vcstool by running the following command:
+
+    sudo pip3 install vcstool
+
 Install the Node.js version 14.x
 
     curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
     sudo apt-get install -y nodejs
 
-Create a new directory to hold the files. Change to that directory in a command prompt, and run:
+Create a new directory, change to that directory in a command prompt, and initialize the workspace
 
+    mkdir -p pyri/software
+    cd pyri/software
     vcs import --input https://raw.githubusercontent.com/pyri-project/pyri-core/master/pyri.repos
     cd scripts
     ./create_python_venv
