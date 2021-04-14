@@ -40,6 +40,14 @@ repositories:
     type: git
     url: https://github.com/pyri-project/pyri-robotics
 
+  pyri-vision:
+    type: git
+    url: https://github.com/pyri-project/pyri-vision
+
+  pyri-vision-browser:
+    type: git
+    url: https://github.com/pyri-project/pyri-vision-browser
+
   pyri-example-plugin:
     type: git
     url: https://github.com/pyri-project/pyri-example-plugin
