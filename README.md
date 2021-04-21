@@ -77,8 +77,8 @@ Create a new directory, change to that directory in a command prompt, and initia
     vcs import --input https://raw.githubusercontent.com/pyri-project/pyri-core/master/pyri.repos
     cd scripts
     ./create_python_venv
-    wget -P ~/Downloads https://github.com/robotraconteur/robotraconteur/releases/download/v0.15.1/RobotRaconteur-0.15.1-cp38-cp38-linux_x86_64.whl
-    ../venv/bin/python -m pip install ~/Downloads/RobotRaconteur-0.15.1-cp38-cp38-linux_x86_64.whl
+    wget -P ~/Downloads https://github.com/robotraconteur/robotraconteur/releases/download/v0.15.2/RobotRaconteur-0.15.2-cp38-cp38-linux_x86_64.whl
+    ../venv/bin/python -m pip install ~/Downloads/RobotRaconteur-0.15.2-cp38-cp38-linux_x86_64.whl
     ./init_workspace_packages
 
 #### Run PyRI and initialize default devices
