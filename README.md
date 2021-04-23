@@ -53,6 +53,18 @@ To run PyRI, change to the `scripts` directory and run `run_all`. Navigate to ht
 
 PyRI can be debugged with VS Code. Be sure to select the Python interpreter in `venv\Scripts\python` using the `Select Python Interpreter` task https://code.visualstudio.com/docs/python/environments Use the `launch.json` file in the `scripts` directory to configure the launch profiles for the PyRI service nodes.
 
+#### Updating
+
+To update PyRI, change to the project root directory and run:
+
+    vcs pull
+
+Next, change to the `scripts` directory and run:
+
+    python install_webui_browser_wheels.py
+
+Restart all services to complete updating.
+
 ### Linux
 
 #### Preparation
@@ -96,6 +108,18 @@ Now, open firefox and go to http://localhost:8000 The PyRI WebUI will start.
 #### Run PyRI
 
 To run PyRI, change to the `scripts` directory and run `./run_all`. Navigate to http://localhost:8000 with firefox
+
+#### Updating
+
+To update PyRI, change to the project root directory and run:
+
+    vcs pull
+
+Next, change to the `scripts` directory and run:
+
+    python install_webui_browser_wheels.py
+
+Restart all services to complete updating.
 
 ## PyRI Components
 
