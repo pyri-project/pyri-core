@@ -221,7 +221,7 @@ class PyriWebUIBrowserPanelPluginFactory:
 
 On load, the WebUI core will call `add_panel` for each panel type returned by `get_panel_infos`. It is expected that the `add_panel` method will add a panel to the golden layout. The HTML template for the panel can be stored in a separate HTML file and loaded using `importlib_resources`, or it can be generated dynamically.
 
-The panel HTML may use Vue to assist with the display. The devices states data is received by the core, and stored in a Vuex instance. This instance can be retrieved, and the state data displayed. 
+The panel HTML may use Vue to assist with the display. The devices states data is received by the core, and stored in a WebUI core class. This instance can be retrieved, and the state data displayed. 
 
 The entry point `pyri.plugins.webui_browser_panel` is used for this plugin type.
 
