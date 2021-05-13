@@ -48,6 +48,10 @@ repositories:
     type: git
     url: git@github.com:pyri-project/pyri-vision-browser.git
 
+  pyri-program-master:
+    type: git
+    url: git@github.com:pyri-project/pyri-program-master.git
+
   pyri-example-plugin:
     type: git
     url: git@github.com:pyri-project/pyri-example-plugin.git
