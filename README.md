@@ -71,7 +71,7 @@ Restart all services to complete updating.
 
 Ubuntu 20.04 or greater required. Run the following:
 
-    sudo apt install python3-pip python3-venv
+    sudo apt install python3-pip python3-venv libboost-all-dev curl git
 
 Next, install vcstool by running the following command:
 
