@@ -16,16 +16,13 @@ setup(
         'RobotRaconteur',
         'numpy',
         'PyYAML',
-        'yamale',
-        'sanic',
-        'RestrictedPython',
-        'appdirs'
+        'appdirs',
     ],
-    tests_require=['pytest','pytest-asyncio','astor','astdiff'],
+    tests_require=['pytest','pytest-asyncio'],
     extras_require={
         'test': ['pytest','pytest-asyncio']
     },
     entry_points = {
-        'console_scripts': ['pyri-core=pyri.core.core:main']
+        'console_scripts': ['pyri-core=pyri.core.__main__:main']
     }
 )
