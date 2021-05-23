@@ -34,14 +34,14 @@ class ProcessState(Enum):
 
 #TODO: Don't hard code services to start
 service_node_launch = [
-    ServiceNodeLaunch("variable_storage", "pyri.variable_storage",["--db-file=test3.db", "--device-info-file=pyri-variable-storage/config/pyri_variable_storage_default_info.yml", "--robotraconteur-tcp-ipv4-discovery=true"],[]),
-    ServiceNodeLaunch("device_manager","pyri.device_manager",["--device-info-file=pyri-device-manager/config/pyri_device_manager_default_info.yml", "--variable-storage-url=rr+tcp://localhost:59901?service=variable_storage", "--robotraconteur-tcp-ipv4-discovery=true"],["variable_storage"]),
-    ServiceNodeLaunch("devices_states","pyri.devices_states",["--device-info-file=pyri-devices-states/config/pyri_devices_states_default_info.yml", "--device-manager-url=rr+tcp://localhost:59902?service=device_manager", "--robotraconteur-tcp-ipv4-discovery=true"],["device_manager"]),
-    ServiceNodeLaunch("sandbox","pyri.sandbox", ["--device-info-file=pyri-sandbox/config/pyri_sandbox_default_info.yml", "--device-manager-url=rr+tcp://localhost:59902?service=device_manager", "--robotraconteur-tcp-ipv4-discovery=true"],["device_manager"]),
-    ServiceNodeLaunch("program_master","pyri.program_master",["--device-info-file=pyri-program-master/config/pyri_program_master_default_info.yml", "--device-manager-url=rr+tcp://localhost:59902?service=device_manager", "--robotraconteur-tcp-ipv4-discovery=true"],["device_manager"]),
-    ServiceNodeLaunch("robotics_jog","pyri.robotics.robotics_jog_service",["--device-info-file=pyri-robotics/config/pyri_robotics_jog_service_default_info.yml", "--device-manager-url=rr+tcp://localhost:59902?service=device_manager", "--robotraconteur-tcp-ipv4-discovery=true"],["device_manager"]),
-    ServiceNodeLaunch("robotics_motion","pyri.robotics.robotics_motion_service",["--device-info-file=pyri-robotics/config/pyri_robotics_motion_service_default_info.yml", "--device-manager-url=rr+tcp://localhost:59902?service=device_manager", "--robotraconteur-tcp-ipv4-discovery=true"],["device_manager"]),
-    ServiceNodeLaunch("webui_server","pyri.webui_server", ["--device-manager-url=rr+tcp://{{ HOSTNAME }}:59902?service=device_manager", "--robotraconteur-tcp-ipv4-discovery=true"],["device_manager"])
+    ServiceNodeLaunch("variable_storage", "pyri.variable_storage",["--db-file=test3.db", ],[]),
+    ServiceNodeLaunch("device_manager","pyri.device_manager",[],["variable_storage"]),
+    ServiceNodeLaunch("devices_states","pyri.devices_states",[],["device_manager"]),
+    ServiceNodeLaunch("sandbox","pyri.sandbox", [],["device_manager"]),
+    ServiceNodeLaunch("program_master","pyri.program_master",[],["device_manager"]),
+    ServiceNodeLaunch("robotics_jog","pyri.robotics.robotics_jog_service",[],["device_manager"]),
+    ServiceNodeLaunch("robotics_motion","pyri.robotics.robotics_motion_service",[],["device_manager"]),
+    ServiceNodeLaunch("webui_server","pyri.webui_server", ["--device-manager-url=rr+tcp://{{ HOSTNAME }}:59902?service=device_manager"],["device_manager"])
 ]
 
 
