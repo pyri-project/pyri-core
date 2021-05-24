@@ -7,11 +7,12 @@ import threading
 import traceback
 import appdirs
 from pathlib import Path
-import uuid
 import sys
 from datetime import datetime
-
-from pyri.util.subprocess_management import get_subprocess_watch_dir
+import os
+import time
+import signal
+from . import subprocess_impl
 
 class ServiceNodeLaunch(NamedTuple):
     name: str
@@ -34,22 +35,27 @@ class ProcessState(Enum):
 
 #TODO: Don't hard code services to start
 service_node_launch = [
-    ServiceNodeLaunch("variable_storage", "pyri.variable_storage",["--db-file=test3.db", ],[]),
-    ServiceNodeLaunch("device_manager","pyri.device_manager",[],["variable_storage"]),
-    ServiceNodeLaunch("devices_states","pyri.devices_states",[],["device_manager"]),
-    ServiceNodeLaunch("sandbox","pyri.sandbox", [],["device_manager"]),
-    ServiceNodeLaunch("program_master","pyri.program_master",[],["device_manager"]),
-    ServiceNodeLaunch("robotics_jog","pyri.robotics.robotics_jog_service",[],["device_manager"]),
-    ServiceNodeLaunch("robotics_motion","pyri.robotics.robotics_motion_service",[],["device_manager"]),
-    ServiceNodeLaunch("webui_server","pyri.webui_server", ["--device-manager-url=rr+tcp://{{ HOSTNAME }}:59902?service=device_manager"],["device_manager"])
+    # ServiceNodeLaunch("variable_storage", "pyri.variable_storage",["--db-file=test3.db", ],[]),
+    # ServiceNodeLaunch("device_manager","pyri.device_manager",[],["variable_storage"]),
+    # ServiceNodeLaunch("devices_states","pyri.devices_states",[],["device_manager"]),
+    ServiceNodeLaunch("sandbox","pyri.sandbox", ["--wait-signal"],["device_manager"]),
+    # ServiceNodeLaunch("program_master","pyri.program_master",[],["device_manager"]),
+    # ServiceNodeLaunch("robotics_jog","pyri.robotics.robotics_jog_service",[],["device_manager"]),
+    # ServiceNodeLaunch("robotics_motion","pyri.robotics.robotics_motion_service",[],["device_manager"]),
+    # ServiceNodeLaunch("webui_server","pyri.webui_server", ["--device-manager-url=rr+tcp://{{ HOSTNAME }}:59902?service=device_manager"],["device_manager"])
 ]
+
+## Taken from popen_spawn_win32.py
+def _path_eq(p1, p2):
+    return p1 == p2 or os.path.normcase(p1) == os.path.normcase(p2)
+WINENV = not _path_eq(sys.executable, sys._base_executable)
+##
 
 
 class PyriProcess:
-    def __init__(self, parent, service_node_launch, subprocess_dir, log_dir, loop):
+    def __init__(self, parent, service_node_launch, log_dir, loop):
         self.parent = parent
         self.service_node_launch = service_node_launch
-        self.subprocess_dir = subprocess_dir
         self.log_dir = log_dir
         self.loop = loop
         self._keep_going = True
@@ -64,7 +70,10 @@ class PyriProcess:
                 try:
                     self.parent.process_state_changed(s.name,ProcessState.START_PENDING)
                     stderr_log.write(f"Starting process {s.name}...\n")
-                    self._process = await asyncio.create_subprocess_exec(sys.executable,*(["-m", s.module_main] + s.args),stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE)
+
+                    python_exe = sys.executable
+                    self._process = await subprocess_impl.create_subprocess_exec(python_exe,(["-m", s.module_main] + s.args))
+                    print(f"process pid: {self._process.pid}")
                     stderr_log.write(f"Process {s.name} started\n\n")                   
                     self.parent.process_state_changed(s.name,ProcessState.RUNNING)
                     stdout_read_task = asyncio.ensure_future(self._process.stdout.readline())
@@ -98,6 +107,7 @@ class PyriProcess:
                     traceback.print_exc()
                     stderr_log.write(f"\nProcess {s.name} error:\n")
                     stderr_log.write(traceback.format_exc())
+                self._process = None
                 if not s.restart:
                     break
                 if self._keep_going:
@@ -107,25 +117,30 @@ class PyriProcess:
     def process_state(self):
         pass
 
+    @property
+    def stopped(self):
+        return self._process == None
+
     def close(self):
         self._keep_going = False
+        if self._process:
+            self._process.send_term()
 
 class PyriCore:
-    def __init__(self, device_info, service_node_launches, subprocess_dir, log_dir, loop):
+    def __init__(self, device_info, service_node_launches, log_dir, loop):
         self.device_info = device_info
         self.service_node_launches = dict()
         self._closed = False
         for s in service_node_launches:
             self.service_node_launches[s.name] = s
-        self.subprocess_dir = subprocess_dir
         self.log_dir = log_dir
-        self._loop = loop        
+        self._loop = loop
 
         self._subprocesses = dict()
         self._lock = threading.Lock()
 
     def _do_start(self,s):
-        p = PyriProcess(self, s, self.subprocess_dir, self.log_dir, self._loop)
+        p = PyriProcess(self, s, self.log_dir, self._loop)
         self._subprocesses[s.name] = p
         self._loop.create_task(p.run())
 
@@ -150,10 +165,9 @@ class PyriCore:
         print(f"Process changed {process_name} {state}")
         if self._closed:
             if state == ProcessState.STOPPED:
-                if process_name in self._subprocesses:
-                    del self._subprocesses[process_name]
-            if len(self._subprocesses) == 0:
-                self._loop.stop()
+                with self._lock:
+                    if process_name in self._subprocesses:
+                        del self._subprocesses[process_name]
 
     def check_deps_status(self, deps):
         return True
@@ -169,24 +183,49 @@ class PyriCore:
                     traceback.print_exc()
                     pass
 
+        self._wait_all_closed()
+    
+    def _wait_all_closed(self):
+        try:
+            t1 = time.time()
+            while True:
+                if time.time() - t1 > 15:
+                    break
+                running_count = 0
+                with self._lock:
+                    for p in self._subprocesses.values():
+                        if not p.stopped:
+                            running_count += 1
+                if running_count == 0:
+                    break
+                time.sleep(0.1)
+            self._loop.stop()
+        except:
+            traceback.print_exc()
+
+
 
 def main():
     try:
         timestamp = datetime.now().strftime("pyri-core-%Y-%m-%d--%H-%M-%S")
         log_dir = Path(appdirs.user_log_dir(appname="pyri-project")).joinpath(timestamp)
         log_dir.mkdir(parents=True, exist_ok=True)
-        subprocess_dir = get_subprocess_watch_dir()
-        subprocess_dir.mkdir(parents=True, exist_ok=True)
+        def loop_in_thread(loop):
+            asyncio.set_event_loop(loop)
+            loop.run_forever()
         loop = asyncio.get_event_loop()
-        core = PyriCore(None, service_node_launch, subprocess_dir, log_dir, loop)
+        t = threading.Thread(target=loop_in_thread, args=(loop,), daemon=True)
+        t.start()
+        core = PyriCore(None, service_node_launch, log_dir, loop)
         core.start_all()
-        loop.run_forever()
-    except KeyboardInterrupt:
-        pass
-    try:
-        print("Shutting down...")
+        def ctrl_c_pressed(signum, frame):
+            print("Shutting down...")
+            core.close()
+        signal.signal(signal.SIGINT, ctrl_c_pressed)
+        #loop.run_forever()
+        input("Press enter to exit")
         core.close()
-        loop.run_forever()
+        print("Done")
     except Exception:
         traceback.print_exc()
     
