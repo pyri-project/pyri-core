@@ -99,34 +99,26 @@ Push Button Wiring:
 
 
 
-
-<p id="gdcalert1" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image1.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert2">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image1.png "image_tooltip")
-
-
-Figure 1: Button Labeled Assembled Teach Pendant
+<figure><img src="figures/AssemblyPictures/Capture15.PNG"><figcaption>Figure 1: Button Labeled Assembled Teach Pendant</figcaption></figure>
 
 
 
-<p id="gdcalert2" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image2.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert3">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
 
 
-![alt_text](images/image2.png "image_tooltip")
-
-
-Figure 2: View of Push Button Wiring
+<figure><img src="figures/AssemblyPictures/Capture14.PNG"><figcaption>Figure 2: View of Push Button Wiring</figcaption></figure>
 
 
 
-<p id="gdcalert3" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image3.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert4">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
+
+<figure><img src="figures/AssemblyPictures/Capture13.PNG"><figcaption>Figure 3: Wiring Diagram of Teach Pendant IO Module</figcaption></figure>
 
 
-![alt_text](images/image3.png "image_tooltip")
 
 
-Figure 3: Wiring Diagram of Teach Pendant IO Module
+
+
+
+
 
 After the push buttons have been wired the E-Stop should be attached by first unscrewing the plastic nut and removing the metal mounting part, the E-Stop should then be inserted so the button faces out of the teach pendant, the metal mounting part  is put back on first and then screwed down using the plastic nut so that the E-Stop is secure against the plastic. You then solder the following wires onto the following numbered pins on the E-Stop: Pin 1->yellow-black wire, Pin 2-> white-black wire, Pin 3->brown-black wire, Pin 4-> white wire.
 
@@ -179,13 +171,12 @@ E-Stop Wiring:
 
 
 
-<p id="gdcalert4" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image4.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert5">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
+<figure><img src="figures/AssemblyPictures/Capture12.PNG"><figcaption>Figure 4: View of Teach Pendant with attached Push buttons and E-Stop</figcaption></figure>
 
 
-![alt_text](images/image4.png "image_tooltip")
 
 
-Figure 4: View of Teach Pendant with attached Push buttons and E-Stop
+
 
 The following wires should then be crimped into male connector pins, the blue wire, the green-black wire, the red wire and the red-black wire. Before these wires are inserted in the connector, they must be threaded through the hole in the back plate, being careful to thread one at a time to prevent jamming them into the hole and damaging the pins. These pins are then inserted into the matching 6-pin male connector such that green-black wire is inserted in position 1, blue is inserted in position 3, red in position 4 and red-black into position 6.
 
@@ -239,14 +230,10 @@ Enable Wiring:
 The enable button should then have 4 wires soldered to it, ideally 2 red wires should be soldered to the C1 and C2 pin of the enable switch, then 2 black wires should be soldered to the NO1 and NO2 pins. Female connector pins should then be crimped onto the opposite ends of the 4 wires. The wire connected to NO1 should then be inserted into position 1 of the matching 6-pin female connector, C1 should be inserted into position 3, C2 into position 4, and NO2 should be inserted into position 6. After this the rubber side of the enable switch around the screw holes should be peeled back to insert screw nuts in to mount the enable switch into the 3D printed part for the grip. Using a hex head screw, the matching screw should be screwed in so that the enable is firmly mounted into the 3D printed grip. 
 
 
-
-<p id="gdcalert5" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image5.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert6">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image5.png "image_tooltip")
+<figure><img src="figures/AssemblyPictures/Capture11.PNG"><figcaption>Figure 5: View of Wired Teach Pendant with Enable Connector</figcaption></figure>
 
 
-Figure 5: View of Wired Teach Pendant with Enable Connector
+
 
 The space mouse should then be screwed into the top plate with the three screws used to mount the metal plate onto the space mouse. The wire from the space mouse should then be reconnected. The last step is to screw the hexhead screw into the tablet mount by placing the screw into the top plate side with the wires exiting it and put the tablet clamp on the outside of the top plate and screw the hexhead in to secure it. The top plate is then ready to be secured to the back plate. First move the multi conductor cable and the spacemouse cable to line up with the wire outlet hole and then hold the parts together firmly as the 6 screws are screwed from the back plate into the top plate so that the assembly feels solid. The connector to the enable button can then be connected and tucked into the grip assembly before screwing on the grip part as well. 
 
@@ -290,13 +277,11 @@ With the Blue-Black being an optional spare connection.
 
 
 
-<p id="gdcalert6" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image6.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert7">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
+<figure><img src="figures/AssemblyPictures/Capture10.PNG"><figcaption>Figure 6: Multiconductor Cable before Strain Relief is Attached (shown without heat shrink)</figcaption></figure>
 
 
-![alt_text](images/image6.png "image_tooltip")
 
 
-Figure 6: Multiconductor Cable before Strain Relief is Attached (shown without heat shrink)
 
 Once all the pins are in the connector the strain relief should be secured to the wire using the largest insert which should be screwed down tightly over the portion of the wire with shrink wrap over it. The connector can then be screwed onto the strain relief portion. The multi conductor cable has now been fully assembled.
 
@@ -307,23 +292,21 @@ To handle the wiring attached to the teach pendant, a metal bracket should be bo
 
 
 
-<p id="gdcalert7" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image7.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert8">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image7.png "image_tooltip")
-
-
-Figure 7: Attachment of bracket and cable management
+<figure><img src="figures/AssemblyPictures/Capture9.PNG"><figcaption>Figure 7: Attachment of bracket and cable management</figcaption></figure>
 
 
 
-<p id="gdcalert8" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image8.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert9">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
 
 
-![alt_text](images/image8.png "image_tooltip")
 
 
-Figure 8: Wire management Clip Assembly
+<figure><img src="figures/AssemblyPictures/Capture8.PNG"><figcaption>Figure 8: Wire management Clip Assembly</figcaption></figure>
+
+
+
+
+
+
 
 
 # 3.0: Runtime Cabinet Assembly
@@ -335,23 +318,23 @@ The assembly of the runtime cabinet begins with the assembly of the aluminum cas
 
 
 
-<p id="gdcalert9" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image9.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert10">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image9.png "image_tooltip")
-
-
-Figure 9: Layout View of Teach Pendant Cabinet (populated but not wired)
+<figure><img src="figures/AssemblyPictures/Capture7.PNG"><figcaption>Figure 9: Layout View of Teach Pendant Cabinet (populated but not wired)</figcaption></figure>
 
 
 
-<p id="gdcalert10" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image10.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert11">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
 
 
-![alt_text](images/image10.png "image_tooltip")
 
 
-Figure 10: Partially Populated view of Runtime Cabinet
+
+
+<figure><img src="figures/AssemblyPictures/Capture6.PNG"><figcaption>Figure 10: Partially Populated view of Runtime Cabinet</figcaption></figure>
+
+
+
+
+
+
 
 
 ## 3.2 Wiring NUC Headers
@@ -360,31 +343,27 @@ To wire the NUC so that it can be powered on from the Runtime Power Button and s
 
 
 
-<p id="gdcalert11" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline drawings not supported directly from Docs. You may want to copy the inline drawing to a standalone drawing and export by reference. See <a href="https://github.com/evbacher/gd2md-html/wiki/Google-Drawings-by-reference">Google Drawings by reference</a> for details. The img URL below is a placeholder. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert12">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![drawing](https://docs.google.com/drawings/d/12345/export/png)
-
-Figure 11: Wiring Documentation for NUC Header Pins
+<figure><img src="figures/AssemblyPictures/Capture5.PNG"><figcaption>Figure 11: Wiring Documentation for NUC Header Pins</figcaption></figure>
 
 
 
-<p id="gdcalert12" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline drawings not supported directly from Docs. You may want to copy the inline drawing to a standalone drawing and export by reference. See <a href="https://github.com/evbacher/gd2md-html/wiki/Google-Drawings-by-reference">Google Drawings by reference</a> for details. The img URL below is a placeholder. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert13">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
 
 
-![drawing](https://docs.google.com/drawings/d/12345/export/png)
-
-Figure 12: View of NUC Casing with Designated Hole for Threading Wires from Header Pins
+<figure><img src="figures/AssemblyPictures/Capture4.PNG"><figcaption>Figure 12: View of NUC Casing with Designated Hole for Threading Wires from Header Pins</figcaption></figure>
 
 
 
-<p id="gdcalert13" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image11.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert14">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
 
 
-![alt_text](images/image11.png "image_tooltip")
 
 
-Figure 13: Wiring Diagram of Runtime Cabinet
+
+<figure><img src="figures/AssemblyPictures/Capture3.PNG"><figcaption>Figure 13: Wiring Diagram of Runtime Cabinet</figcaption></figure>
+
+
+
+
+
 
 
 # 4.0: Raspberry Pi Teach Pendant Version Assembly
@@ -396,32 +375,31 @@ Before assembling the Raspberry Pi Teach Pendant you might want to initialize th
 
 
 
-<p id="gdcalert14" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image12.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert15">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image12.png "image_tooltip")
-
-
-Figure 14: Raspberry Pi Pinout Diagram
+<figure><img src="figures/AssemblyPictures/Capture2.PNG"><figcaption>Figure 14: Raspberry Pi Pinout Diagram</figcaption></figure>
 
 
 
-<p id="gdcalert15" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline drawings not supported directly from Docs. You may want to copy the inline drawing to a standalone drawing and export by reference. See <a href="https://github.com/evbacher/gd2md-html/wiki/Google-Drawings-by-reference">Google Drawings by reference</a> for details. The img URL below is a placeholder. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert16">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![drawing](https://docs.google.com/drawings/d/12345/export/png)
-
-Figure 15: Raspberry Pi Touchscreen Pinout Location
 
 
 
-<p id="gdcalert16" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image13.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert17">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
 
 
-![alt_text](images/image13.jpg "image_tooltip")
+
+<figure><img src="figures/AssemblyPictures/Capture.PNG"><figcaption>Figure 15: Raspberry Pi Touchscreen Pinout Location</figcaption></figure>
 
 
-Figure 16: Raspberry Pi and Touch Screen Initially Placed in 3D Printed Enclosure
+
+
+
+
+
+<figure><img src="figures/AssemblyPictures/IMG_4824.JPG"><figcaption>Figure 16: Raspberry Pi and Touch Screen Initially Placed in 3D Printed Enclosure</figcaption></figure>
+
+
+
+
+
+
 
 
 ## 4.2 Assembly of Outer Casing
@@ -429,46 +407,44 @@ Figure 16: Raspberry Pi and Touch Screen Initially Placed in 3D Printed Enclosur
 	Once the Pi is attached to the Touch Screen you can slide the touchscreen into the front face of the Raspberry Pi front plate piece as shown in Figure 16. There are 4 screw holes to attach the touchscreen to the case then. Screw it in firmly. Next there is a black metal mounting piece that must be screwed to the side of the case using the two outermost screw holes as shown in Figure 17. This allows the mounting of the I/O module securely.
 
 
-
-<p id="gdcalert17" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image14.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert18">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image14.jpg "image_tooltip")
-
-
-Figure 17: Placement of Metal Mounting Plate in 3D Printed Base
+<figure><img src="figures/AssemblyPictures/IMG_4825.JPG"><figcaption>Figure 17: Placement of Metal Mounting Plate in 3D Printed Base</figcaption></figure>
 
 
 
-<p id="gdcalert18" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image15.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert19">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
 
 
-![alt_text](images/image15.jpg "image_tooltip")
 
 
-Figure 18: View of Mounting Location for IO Module to Raspberry Pi Teach Pendant Module
+
+
+<figure><img src="figures/AssemblyPictures/IMG_4826.JPG"><figcaption>Figure 18: View of Mounting Location for IO Module to Raspberry Pi Teach Pendant Module</figcaption></figure>
+
+
+
+
+
+
 
 Next, the cables should be attached, for ease of assembly you may wish to attach the USB I/O cable before inserting the Pi and Touchscreen into the case, you may need to bend the cable while inserting, be careful. Attach the USB I/O cable to the USB 2 or 3 ports and the USB-C right angled connector into the USB- C power port as shown below. Try to make sure that you don’t plug the USB I/O cable into a port that is too close to the mounting hole for the I/O module.
 
 
-
-<p id="gdcalert19" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image16.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert20">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image16.jpg "image_tooltip")
-
-
-Figure 19: Raspberry Pi with USB cables Inserted
+<figure><img src="figures/AssemblyPictures/IMG_4827.JPG"><figcaption>Figure 19: Raspberry Pi with USB cables Inserted</figcaption></figure>
 
 
 
-<p id="gdcalert20" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image17.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert21">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
 
 
-![alt_text](images/image17.jpg "image_tooltip")
 
 
-Figure 20: USB cables Inserted into Raspberry Pi Second View
+
+
+<figure><img src="figures/AssemblyPictures/IMG_4828.JPG"><figcaption>Figure 20: USB cables Inserted into Raspberry Pi Second View</figcaption></figure>
+
+
+
+
+
+
 
 
 ## 4.3 I/O Module Attachment and Internal Wire Management
@@ -477,53 +453,49 @@ To Attach the I/O module, simply press it into the fitted slot and insert the sc
 
 
 
-<p id="gdcalert21" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image18.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert22">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image18.jpg "image_tooltip")
-
-
-Figure 21: Wiring pass Through for IO Module in Raspberry Pi Teach Pendant
+<figure><img src="figures/AssemblyPictures/IMG_4831.JPG"><figcaption>Figure 21: Wiring pass Through for IO Module in Raspberry Pi Teach Pendant</figcaption></figure>
 
 
 
-<p id="gdcalert22" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image19.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert23">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image19.jpg "image_tooltip")
-
-
-Figure 22: Zip Tied wires in Interior of Raspberry Pi Teach Pendant
 
 
 
-<p id="gdcalert23" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image20.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert24">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
 
-
-![alt_text](images/image20.jpg "image_tooltip")
-
-
-Figure 23: Closed IO Module Before Attachment of Enable Button
+<figure><img src="figures/AssemblyPictures/IMG_4833.JPG"><figcaption>Figure 22: Zip Tied wires in Interior of Raspberry Pi Teach Pendant</figcaption></figure>
 
 
 
-<p id="gdcalert24" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image21.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert25">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image21.jpg "image_tooltip")
-
-
-Figure 24: Fully Assembled IO Module Attached To Raspberry Pi Teach Pendant Module
 
 
 
-<p id="gdcalert25" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image22.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert26">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
 
 
-![alt_text](images/image22.jpg "image_tooltip")
+
+<figure><img src="figures/AssemblyPictures/IMG_4836.JPG"><figcaption>Figure 23: Closed IO Module Before Attachment of Enable Button</figcaption></figure>
 
 
-Figure 25: Screwed Together Rasbperry Pi Teach Pendant Module
+
+
+
+
+
+
+
+<figure><img src="figures/AssemblyPictures/IMG_4837.JPG"><figcaption>Figure 24: Fully Assembled IO Module Attached To Raspberry Pi Teach Pendant Module</figcaption></figure>
+
+
+
+
+
+
+
+
+
+<figure><img src="figures/AssemblyPictures/IMG_4838.JPG"><figcaption>Figure 25: Screwed Together Rasbperry Pi Teach Pendant Module
+</figcaption></figure>
+
+
+
 
 
 ## 4.4 Cable Management
@@ -532,63 +504,60 @@ To finish the module, you will need 3 USB extension cords, of which, the USB cab
 
 
 
-<p id="gdcalert26" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image23.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert27">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image23.jpg "image_tooltip")
-
-
-Figure 26: Zip Tied Cables View 1
+<figure><img src="figures/AssemblyPictures/IMG_4839.JPG"><figcaption>Figure 26: Zip Tied Cables View 1</figcaption></figure>
 
 
 
-<p id="gdcalert27" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image24.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert28">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image24.jpg "image_tooltip")
-
-
-Figure 27: Zip Tied Cables View 2
 
 
 
-<p id="gdcalert28" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image25.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert29">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
 
 
-![alt_text](images/image25.jpg "image_tooltip")
-
-
-Figure 28: Zip Tied Cables View 3
+<figure><img src="figures/AssemblyPictures/IMG_4840.JPG"><figcaption>Figure 27: Zip Tied Cables View 2</figcaption></figure>
 
 
 
-<p id="gdcalert29" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image26.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert30">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image26.jpg "image_tooltip")
-
-
-Figure 29: Initial Wire Wrap Attachment
 
 
 
-<p id="gdcalert30" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image27.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert31">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image27.jpg "image_tooltip")
-
-
-Figure 30: Wire Wrapping Attachment View of Runtime Cabinet End
 
 
 
-<p id="gdcalert31" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image28.jpg). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert32">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
+<figure><img src="figures/AssemblyPictures/Capture17.PNG"><figcaption>Figure 28: Zip Tied Cables View 3</figcaption></figure>
 
 
-![alt_text](images/image28.jpg "image_tooltip")
 
 
-Figure 31: Wire Wrapping Clamp Attached on Teach Pendant Side
+
+
+
+
+<figure><img src="figures/AssemblyPictures/Capture16.PNG"><figcaption>Figure 29: Initial Wire Wrap Attachment</figcaption></figure>
+
+
+
+
+
+
+
+
+<figure><img src="figures/AssemblyPictures/IMG_4843.JPG"><figcaption>Figure 30: Wire Wrapping Attachment View of Runtime Cabinet End</figcaption></figure>
+
+
+
+
+
+
+
+
+
+<figure><img src="figures/AssemblyPictures/IMG_4844.JPG"><figcaption>Figure 31: Wire Wrapping Clamp Attached on Teach Pendant Side</figcaption></figure>
+
+
+
+
+
+
 
 
 # 5.0: Software Setup for Teach Pendant
