@@ -1,7 +1,7 @@
 from ctypes.wintypes import WIN32_FIND_DATAW
 import sys
 import asyncio
-
+import subprocess
 
 if sys.platform == "win32":
     from . import subprocess_impl_win32
@@ -13,7 +13,8 @@ async def create_subprocess_exec(process, args, env=None):
 
         process = await asyncio.create_subprocess_exec(process,*args, \
             stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE,\
-            env=env, creationflags=subprocess_impl_win32.CREATE_SUSPENDED,close_fds=True)
+            env=env, creationflags=subprocess_impl_win32.CREATE_SUSPENDED | \
+            subprocess.CREATE_NEW_PROCESS_GROUP,close_fds=True)
 
         subprocess_impl_win32.win32_attach_job_and_resume_process(process, job_handle)
 
@@ -48,6 +49,9 @@ class PyriSubprocessImpl:
 
     def wait(self):
         return self._process.wait()
+
+    def kill(self):
+        self._process.kill()
 
     def send_term(self):
         if sys.platform == "win32":

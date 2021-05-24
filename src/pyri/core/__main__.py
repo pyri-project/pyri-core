@@ -13,6 +13,7 @@ import os
 import time
 import signal
 from . import subprocess_impl
+from pyri.util.wait_exit import wait_exit
 
 class ServiceNodeLaunch(NamedTuple):
     name: str
@@ -35,14 +36,14 @@ class ProcessState(Enum):
 
 #TODO: Don't hard code services to start
 service_node_launch = [
-    # ServiceNodeLaunch("variable_storage", "pyri.variable_storage",["--db-file=test3.db", ],[]),
-    # ServiceNodeLaunch("device_manager","pyri.device_manager",[],["variable_storage"]),
-    # ServiceNodeLaunch("devices_states","pyri.devices_states",[],["device_manager"]),
+    ServiceNodeLaunch("variable_storage", "pyri.variable_storage",["--db-file=test3.db", "--wait-signal"],[]),
+    ServiceNodeLaunch("device_manager","pyri.device_manager",["--wait-signal"],["variable_storage"]),
+    ServiceNodeLaunch("devices_states","pyri.devices_states",["--wait-signal"],["device_manager"]),
     ServiceNodeLaunch("sandbox","pyri.sandbox", ["--wait-signal"],["device_manager"]),
-    # ServiceNodeLaunch("program_master","pyri.program_master",[],["device_manager"]),
-    # ServiceNodeLaunch("robotics_jog","pyri.robotics.robotics_jog_service",[],["device_manager"]),
-    # ServiceNodeLaunch("robotics_motion","pyri.robotics.robotics_motion_service",[],["device_manager"]),
-    # ServiceNodeLaunch("webui_server","pyri.webui_server", ["--device-manager-url=rr+tcp://{{ HOSTNAME }}:59902?service=device_manager"],["device_manager"])
+    ServiceNodeLaunch("program_master","pyri.program_master",["--wait-signal"],["device_manager"]),
+    ServiceNodeLaunch("robotics_jog","pyri.robotics.robotics_jog_service",["--wait-signal"],["device_manager"]),
+    ServiceNodeLaunch("robotics_motion","pyri.robotics.robotics_motion_service",["--wait-signal"],["device_manager"]),
+    ServiceNodeLaunch("webui_server","pyri.webui_server", ["--device-manager-url=rr+tcp://{{ HOSTNAME }}:59902?service=device_manager"],["device_manager"])
 ]
 
 ## Taken from popen_spawn_win32.py
@@ -73,7 +74,7 @@ class PyriProcess:
 
                     python_exe = sys.executable
                     self._process = await subprocess_impl.create_subprocess_exec(python_exe,(["-m", s.module_main] + s.args))
-                    print(f"process pid: {self._process.pid}")
+                    # print(f"process pid: {self._process.pid}")
                     stderr_log.write(f"Process {s.name} started\n\n")                   
                     self.parent.process_state_changed(s.name,ProcessState.RUNNING)
                     stdout_read_task = asyncio.ensure_future(self._process.stdout.readline())
@@ -125,6 +126,15 @@ class PyriProcess:
         self._keep_going = False
         if self._process:
             self._process.send_term()
+    
+    def kill(self):
+        p = self._process
+        if p is None:
+            return
+        try:
+            self._process.kill()
+        except:
+            traceback.print_exc()
 
 class PyriCore:
     def __init__(self, device_info, service_node_launches, log_dir, loop):
@@ -137,7 +147,7 @@ class PyriCore:
         self._loop = loop
 
         self._subprocesses = dict()
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
 
     def _do_start(self,s):
         p = PyriProcess(self, s, self.log_dir, self._loop)
@@ -174,6 +184,8 @@ class PyriCore:
 
     def close(self):
         with self._lock:
+            if self._closed:
+                return
             self._closed = True
 
             for p in self._subprocesses.values():
@@ -188,8 +200,10 @@ class PyriCore:
     def _wait_all_closed(self):
         try:
             t1 = time.time()
+            t_last_sent_close = 0
             while True:
-                if time.time() - t1 > 15:
+                t_diff = time.time() - t1
+                if t_diff > 15:
                     break
                 running_count = 0
                 with self._lock:
@@ -199,6 +213,31 @@ class PyriCore:
                 if running_count == 0:
                     break
                 time.sleep(0.1)
+                if t_diff > t_last_sent_close + 1:
+                    t_last_sent_close = t_diff
+                    with self._lock:
+                        for p in self._subprocesses.values():
+                            if not p.stopped:
+                                try:
+                                    p.close()
+                                except Exception:
+                                    traceback.print_exc()
+                                    pass
+            
+            running_count = 0
+            with self._lock:
+                for p in self._subprocesses.values():
+                    if not p.stopped:
+                        running_count += 1
+                        try:
+                            p.kill()
+                        except Exception:
+                            traceback.print_exc()
+                        
+            if running_count != 0:
+                print("Sending processes still running SIGKILL")                
+                time.sleep(2)               
+
             self._loop.stop()
         except:
             traceback.print_exc()
@@ -213,18 +252,20 @@ def main():
         def loop_in_thread(loop):
             asyncio.set_event_loop(loop)
             loop.run_forever()
-        loop = asyncio.get_event_loop()
+            print("Exited loop!")
+        loop = asyncio.new_event_loop()
         t = threading.Thread(target=loop_in_thread, args=(loop,), daemon=True)
         t.start()
         core = PyriCore(None, service_node_launch, log_dir, loop)
-        core.start_all()
+        loop.call_soon_threadsafe(lambda: core.start_all())
         def ctrl_c_pressed(signum, frame):
-            print("Shutting down...")
-            core.close()
+            loop.call_soon_threadsafe(lambda: core.close())
         signal.signal(signal.SIGINT, ctrl_c_pressed)
+        signal.signal(signal.SIGTERM, ctrl_c_pressed)
         #loop.run_forever()
-        input("Press enter to exit")
+        wait_exit(False)
         core.close()
+        
         print("Done")
     except Exception:
         traceback.print_exc()

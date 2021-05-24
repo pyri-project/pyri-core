@@ -139,9 +139,10 @@ if sys.platform == "win32":
         for p in pids:
             win32_send_pid_wm_close(p)
 
-    def win32_send_pid_wm_close(pid):
+    def win32_send_pid_wm_close(pid):        
         _win32_send_pid_wm_close_hwnd_message(pid)
         _win32_send_pid_wm_close_hwnd_main(pid)
+        _win32_send_ctrl_c_event(pid)
 
     def _win32_send_pid_wm_close_hwnd_message(pid):
         hWnd_child_after = 0
@@ -170,6 +171,9 @@ if sys.platform == "win32":
         cb_worker = WNDENUMPROC(worker)
         if not ctypes.windll.user32.EnumWindows(cb_worker, pid):
             return
+
+    def _win32_send_ctrl_c_event(pid):
+        ctypes.windll.kernel32.GenerateConsoleCtrlEvent(0,pid)
         
         
 
