@@ -1,3 +1,4 @@
+import argparse
 from ctypes import ArgumentError
 import asyncio
 import yaml
@@ -14,15 +15,7 @@ import time
 import signal
 from . import subprocess_impl
 from pyri.util.wait_exit import wait_exit
-
-class ServiceNodeLaunch(NamedTuple):
-    name: str
-    module_main: str
-    args: List[str]
-    depends: List[str]
-    depends_backoff: float = 1
-    restart: bool = False
-    restart_backoff: float = 5
+from pyri.plugins.service_node_launch import get_all_service_node_launches
 
 # Based on MS Windows service states
 class ProcessState(Enum):
@@ -35,28 +28,22 @@ class ProcessState(Enum):
     PAUSED = 0x7
 
 #TODO: Don't hard code services to start
-service_node_launch = [
-    ServiceNodeLaunch("variable_storage", "pyri.variable_storage",["--db-file=test3.db"],[]),
-    ServiceNodeLaunch("device_manager","pyri.device_manager",[],["variable_storage"]),
-    ServiceNodeLaunch("devices_states","pyri.devices_states",[],["device_manager"]),
-    ServiceNodeLaunch("sandbox","pyri.sandbox", [],["device_manager"]),
-    ServiceNodeLaunch("program_master","pyri.program_master",[],["device_manager"]),
-    ServiceNodeLaunch("robotics_jog","pyri.robotics.robotics_jog_service",[],["device_manager"]),
-    ServiceNodeLaunch("robotics_motion","pyri.robotics.robotics_motion_service",[],["device_manager"]),
-    ServiceNodeLaunch("webui_server","pyri.webui_server", ["--device-manager-url=rr+tcp://{{ HOSTNAME }}:59902?service=device_manager"],["device_manager"])
-]
-
-## Taken from popen_spawn_win32.py
-def _path_eq(p1, p2):
-    return p1 == p2 or os.path.normcase(p1) == os.path.normcase(p2)
-WINENV = not _path_eq(sys.executable, sys._base_executable)
-##
-
+# service_node_launch = [
+#     ServiceNodeLaunch("variable_storage", "pyri.variable_storage",["--db-file=test3.db"],[]),
+#     ServiceNodeLaunch("device_manager","pyri.device_manager",[],["variable_storage"]),
+#     ServiceNodeLaunch("devices_states","pyri.devices_states",[],["device_manager"]),
+#     ServiceNodeLaunch("sandbox","pyri.sandbox", [],["device_manager"]),
+#     ServiceNodeLaunch("program_master","pyri.program_master",[],["device_manager"]),
+#     ServiceNodeLaunch("robotics_jog","pyri.robotics.robotics_jog_service",[],["device_manager"]),
+#     ServiceNodeLaunch("robotics_motion","pyri.robotics.robotics_motion_service",[],["device_manager"]),
+#     ServiceNodeLaunch("webui_server","pyri.webui_server", ["--device-manager-url=rr+tcp://{{ HOSTNAME }}:59902?service=device_manager"],["device_manager"])
+# ]
 
 class PyriProcess:
-    def __init__(self, parent, service_node_launch, log_dir, loop):
+    def __init__(self, parent, service_node_launch, parser_results, log_dir, loop):
         self.parent = parent
         self.service_node_launch = service_node_launch
+        self.parser_results = parser_results
         self.log_dir = log_dir
         self.loop = loop
         self._keep_going = True
@@ -71,9 +58,9 @@ class PyriProcess:
                 try:
                     self.parent.process_state_changed(s.name,ProcessState.START_PENDING)
                     stderr_log.write(f"Starting process {s.name}...\n")
-
+                    args = s.prepare_service_args(self.parser_results)
                     python_exe = sys.executable
-                    self._process = await subprocess_impl.create_subprocess_exec(python_exe,(["-m", s.module_main] + s.args))
+                    self._process = await subprocess_impl.create_subprocess_exec(python_exe,(["-m", s.module_main] + args))
                     # print(f"process pid: {self._process.pid}")
                     stderr_log.write(f"Process {s.name} started\n\n")                   
                     self.parent.process_state_changed(s.name,ProcessState.RUNNING)
@@ -137,7 +124,7 @@ class PyriProcess:
             traceback.print_exc()
 
 class PyriCore:
-    def __init__(self, device_info, service_node_launches, log_dir, loop):
+    def __init__(self, device_info, service_node_launches, parser_results, log_dir, loop):
         self.device_info = device_info
         self.service_node_launches = dict()
         self._closed = False
@@ -145,12 +132,13 @@ class PyriCore:
             self.service_node_launches[s.name] = s
         self.log_dir = log_dir
         self._loop = loop
+        self._parser_results = parser_results
 
         self._subprocesses = dict()
         self._lock = threading.RLock()
 
     def _do_start(self,s):
-        p = PyriProcess(self, s, self.log_dir, self._loop)
+        p = PyriProcess(self, s, self._parser_results, self.log_dir, self._loop)
         self._subprocesses[s.name] = p
         self._loop.create_task(p.run())
 
@@ -246,6 +234,18 @@ class PyriCore:
 
 def main():
     try:
+        
+        service_node_launch_dict = get_all_service_node_launches()
+        service_node_launch = []
+        for l in service_node_launch_dict.values():
+            service_node_launch.extend(l)
+        parser = argparse.ArgumentParser("PyRI Core Launcher")
+        for l in service_node_launch:
+            if l.add_arg_parser_options is not None:
+                l.add_arg_parser_options(parser)
+
+        parser_results, _ = parser.parse_known_args()
+
         timestamp = datetime.now().strftime("pyri-core-%Y-%m-%d--%H-%M-%S")
         log_dir = Path(appdirs.user_log_dir(appname="pyri-project")).joinpath(timestamp)
         log_dir.mkdir(parents=True, exist_ok=True)
@@ -256,7 +256,8 @@ def main():
         loop = asyncio.new_event_loop()
         t = threading.Thread(target=loop_in_thread, args=(loop,), daemon=True)
         t.start()
-        core = PyriCore(None, service_node_launch, log_dir, loop)
+                
+        core = PyriCore(None, service_node_launch, parser_results, log_dir, loop)
         loop.call_soon_threadsafe(lambda: core.start_all())
         def ctrl_c_pressed(signum, frame):
             loop.call_soon_threadsafe(lambda: core.close())
