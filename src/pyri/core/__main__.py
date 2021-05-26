@@ -253,6 +253,7 @@ class PyriCore:
         res, c = device_manager_sub.TryGetDefaultClient()
         if not res:
             print("Warning: could not connect to device manager to add default devices")
+            return
 
         active_devices = await c.async_getf_active_devices(None)
         active_device_names = [a.local_device_name for a in active_devices]
@@ -269,7 +270,8 @@ class PyriCore:
                     added_devices.append(d[1])
             except Exception as e:
                 print(f"Warning: could not add default device {d[1]}: {str(e)}")
-        print(f"Added default devices: {added_devices}")
+        if len(added_devices) > 0:
+            print(f"Added default devices: {added_devices}")
 
 def main():
     try:

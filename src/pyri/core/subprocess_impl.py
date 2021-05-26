@@ -1,7 +1,7 @@
-from ctypes.wintypes import WIN32_FIND_DATAW
 import sys
 import asyncio
 import subprocess
+import os
 
 if sys.platform == "win32":
     from . import subprocess_impl_win32
@@ -22,7 +22,10 @@ async def create_subprocess_exec(process, args, env=None):
 
     else:
         #TODO: Use "start_new_session=True" arg for new process
-        raise NotImplementedError()
+        process = await asyncio.create_subprocess_exec(process,*args, \
+            stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE,\
+            env=env, close_fds=True, preexec_fn=os.setsid )
+        return PyriSubprocessImpl(process)
 
 
 class PyriSubprocessImpl:
@@ -56,7 +59,17 @@ class PyriSubprocessImpl:
     def send_term(self):
         if sys.platform == "win32":
             subprocess_impl_win32.win32_send_job_wm_close(self._job_handle)
+        else:
+            import signal
+            pid = self._process.pid
+            pgid = os.getpgid(pid)
+            os.killpg(pgid, signal.SIGINT)
 
     def close(self):
         if sys.platform == "win32":            
             subprocess_impl_win32.win32_close_job_object(self._job_handle)
+        else:
+            try:
+                self._process.kill()
+            except Exception:
+                pass
