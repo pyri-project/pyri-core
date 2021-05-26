@@ -233,7 +233,7 @@ class PyriCore:
         except:
             traceback.print_exc()
 
-    def add_default_devices(self, delay_seconds=5):
+    def add_default_devices(self, delay_seconds=10):
         self._loop.create_task(self._do_add_default_devices(delay_seconds))
     
     async def _do_add_default_devices(self, delay_seconds):
