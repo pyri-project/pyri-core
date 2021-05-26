@@ -40,6 +40,10 @@ repositories:
     type: git
     url: git@github.com:pyri-project/pyri-robotics.git
 
+  pyri-robotics-browser:
+    type: git
+    url: git@github.com:pyri-project/pyri-robotics-browser.git
+
   pyri-vision:
     type: git
     url: git@github.com:pyri-project/pyri-vision.git
