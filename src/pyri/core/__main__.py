@@ -36,13 +36,13 @@ class ProcessState(Enum):
 
 #TODO: Don't hard code services to start
 service_node_launch = [
-    ServiceNodeLaunch("variable_storage", "pyri.variable_storage",["--db-file=test3.db", "--wait-signal"],[]),
-    ServiceNodeLaunch("device_manager","pyri.device_manager",["--wait-signal"],["variable_storage"]),
-    ServiceNodeLaunch("devices_states","pyri.devices_states",["--wait-signal"],["device_manager"]),
-    ServiceNodeLaunch("sandbox","pyri.sandbox", ["--wait-signal"],["device_manager"]),
-    ServiceNodeLaunch("program_master","pyri.program_master",["--wait-signal"],["device_manager"]),
-    ServiceNodeLaunch("robotics_jog","pyri.robotics.robotics_jog_service",["--wait-signal"],["device_manager"]),
-    ServiceNodeLaunch("robotics_motion","pyri.robotics.robotics_motion_service",["--wait-signal"],["device_manager"]),
+    ServiceNodeLaunch("variable_storage", "pyri.variable_storage",["--db-file=test3.db"],[]),
+    ServiceNodeLaunch("device_manager","pyri.device_manager",[],["variable_storage"]),
+    ServiceNodeLaunch("devices_states","pyri.devices_states",[],["device_manager"]),
+    ServiceNodeLaunch("sandbox","pyri.sandbox", [],["device_manager"]),
+    ServiceNodeLaunch("program_master","pyri.program_master",[],["device_manager"]),
+    ServiceNodeLaunch("robotics_jog","pyri.robotics.robotics_jog_service",[],["device_manager"]),
+    ServiceNodeLaunch("robotics_motion","pyri.robotics.robotics_motion_service",[],["device_manager"]),
     ServiceNodeLaunch("webui_server","pyri.webui_server", ["--device-manager-url=rr+tcp://{{ HOSTNAME }}:59902?service=device_manager"],["device_manager"])
 ]
 
@@ -263,7 +263,7 @@ def main():
         signal.signal(signal.SIGINT, ctrl_c_pressed)
         signal.signal(signal.SIGTERM, ctrl_c_pressed)
         #loop.run_forever()
-        wait_exit(False)
+        wait_exit()
         core.close()
         
         print("Done")
