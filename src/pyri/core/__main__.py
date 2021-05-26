@@ -16,6 +16,9 @@ import signal
 from . import subprocess_impl
 from pyri.util.wait_exit import wait_exit
 from pyri.plugins.service_node_launch import get_all_service_node_launches
+from pyri.device_manager_client import _DeviceManagerConnectFilter
+from RobotRaconteur.Client import *
+from RobotRaconteurCompanion.Util.IdentifierUtil import IdentifierUtil
 
 # Based on MS Windows service states
 class ProcessState(Enum):
@@ -230,7 +233,43 @@ class PyriCore:
         except:
             traceback.print_exc()
 
+    def add_default_devices(self, delay_seconds=5):
+        self._loop.create_task(self._do_add_default_devices(delay_seconds))
+    
+    async def _do_add_default_devices(self, delay_seconds):
 
+        default_devices = []
+        for l in self.service_node_launches.values():
+            if l.default_devices is not None and len(l.default_devices) > 0:
+                default_devices.extend(l.default_devices)
+        if len(default_devices) == 0:
+            return
+
+        filter = _DeviceManagerConnectFilter("pyri_device_manager")
+        device_manager_sub = RRN.SubscribeServiceByType("tech.pyri.device_manager.DeviceManager", filter.get_filter())
+        if delay_seconds > 0:            
+            await asyncio.sleep(delay_seconds)
+
+        res, c = device_manager_sub.TryGetDefaultClient()
+        if not res:
+            print("Warning: could not connect to device manager to add default devices")
+
+        active_devices = await c.async_getf_active_devices(None)
+        active_device_names = [a.local_device_name for a in active_devices]
+
+        ident_util = IdentifierUtil(client_obj = c)
+
+        added_devices = []
+
+        for d in default_devices:
+            try:
+                if d[1] not in active_device_names:
+                    d_ident = ident_util.CreateIdentifierFromName(d[0])
+                    await c.async_add_device(d_ident,d[1],[],None)
+                    added_devices.append(d[1])
+            except Exception as e:
+                print(f"Warning: could not add default device {d[1]}: {str(e)}")
+        print(f"Added default devices: {added_devices}")
 
 def main():
     try:
@@ -240,6 +279,7 @@ def main():
         for l in service_node_launch_dict.values():
             service_node_launch.extend(l)
         parser = argparse.ArgumentParser("PyRI Core Launcher")
+        parser.add_argument("--no-add-default-devices",action='store_true',default=False,help="Don't add default devices")
         for l in service_node_launch:
             if l.add_arg_parser_options is not None:
                 l.add_arg_parser_options(parser)
@@ -259,6 +299,8 @@ def main():
                 
         core = PyriCore(None, service_node_launch, parser_results, log_dir, loop)
         loop.call_soon_threadsafe(lambda: core.start_all())
+        if not parser_results.no_add_default_devices:
+            loop.call_soon_threadsafe(lambda: core.add_default_devices())
         def ctrl_c_pressed(signum, frame):
             loop.call_soon_threadsafe(lambda: core.close())
         signal.signal(signal.SIGINT, ctrl_c_pressed)
