@@ -233,7 +233,7 @@ class PyriCore:
         except:
             traceback.print_exc()
 
-    def add_default_devices(self, delay_seconds=10):
+    def add_default_devices(self, delay_seconds=5):
         self._loop.create_task(self._do_add_default_devices(delay_seconds))
     
     async def _do_add_default_devices(self, delay_seconds):
@@ -250,10 +250,19 @@ class PyriCore:
         if delay_seconds > 0:            
             await asyncio.sleep(delay_seconds)
 
+        a, f = await self._do_add_default_devices2(default_devices, device_manager_sub)
+
+        while f is None or len(f) > 0:
+            print("Retrying add default devices...")
+            await asyncio.sleep(5)
+            a, f = await self._do_add_default_devices2(default_devices, device_manager_sub)
+
+    async def _do_add_default_devices2(self, default_devices, device_manager_sub):
+
         res, c = device_manager_sub.TryGetDefaultClient()
         if not res:
             print("Warning: could not connect to device manager to add default devices")
-            return
+            return None, None
 
         active_devices = await c.async_getf_active_devices(None)
         active_device_names = [a.local_device_name for a in active_devices]
@@ -261,6 +270,7 @@ class PyriCore:
         ident_util = IdentifierUtil(client_obj = c)
 
         added_devices = []
+        failed_devices = []
 
         for d in default_devices:
             try:
@@ -270,8 +280,11 @@ class PyriCore:
                     added_devices.append(d[1])
             except Exception as e:
                 print(f"Warning: could not add default device {d[1]}: {str(e)}")
+                failed_devices.append(d[1])
         if len(added_devices) > 0:
             print(f"Added default devices: {added_devices}")
+
+        return added_devices, failed_devices
 
 def main():
     try:
