@@ -97,12 +97,14 @@ In addition to the buttons, a joystick input can be used to jog the robot. This 
 
 The program menu is where blockly and python code to be used by the system is created and stored. The Program menu also contains a number of submenus that provide different functions as well. These submenus include the following: Main, Procedure List, Output and Globals List. Output is simply an output window that displays any output from the code running on the system, this is very useful for debugging purposes and monitoring any system functions. Globals List contains any saved robot poses, camera calibration data and images, image ROIs, image templates for template matching and any other defined global variables for the system. 
 <br><br>
+
 ### 3.1: Main Program Menu
 
 The Main Program menu allows the operator to arrange defined functions as steps into a larger procedure. This is done by using the "Add Step" button and placing the steps sequentially in the layout. The program can then be run all at once or each step can be run one at a time by pressing the "Step One" button. The created program can also be saved for later use and reloaded into the system again. The Main Program Menu can be seen in Figure 9. In the individual steps you can move the steps up and down in the program using the arrows shown, and the side arrow will move the current program pointer to execute this step next. The "Clear Pointer" button will also reset the position of the program pointer to the start of the program. Errors in the system can also be cleared using the "Clear Errors" button to proceed with operations.
 <br><br>
 <figure><img src="figures/pyri_software_architecture/programmenu.PNG"><figcaption>Figure 9: Program Menu Main Run Screen</figcaption></figure>
 <br><br>
+
 ### 3.2: Procedure List Menu
 
 The Procedure List menu shows all the currently loaded programs in both Blockly and PyRI as shown in Figure 10. New Blockly and PyRI procedures can be added using the corresponding "New XXXX" buttons. Which will create a new window in the menu with the procedure name specified, examples of this are shown in Figures 12 and 13. These can then be edited using the touchscreen buttons provided or with a standard mouse and keyboard. In the procedure window these procedures can also be run or stopped for testing purposes, and are saved using the "Save" button. An example of a full Blockly procedure is shown in Figure 11. The individual procedures can also be opened, copied and deleted from the Procedure List menu using the corresponding buttons.
