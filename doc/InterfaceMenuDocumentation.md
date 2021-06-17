@@ -74,6 +74,7 @@ There are also a number of devices loaded by default which provide important fun
   </tr>
 </table>
 <br><br>
+
 ## 2.0: Jogging Menu
 
 The Jogging Menu allows the operator to select robots to jog and move around as well as actuate defined tools. On system start the Jogging Menu will appear as shown in Figure 6. To connect to an added Robot Device, simply press on the drop-down Robot menu in the upper left of the screen. The status indicator should then change to Halt. You can then press the "Enable Jog" mode and the status indicator should change to Ready as shown in Figure 7. You can also select a tool to connect to in a similar manner, but with tools you can normally only open or close them using the appropriate buttons. There are a variety of jogging modes available, and joint angles are presented along with their maximum ranges. The robot can also be jogged in cartesian using the Task Space Jog menu, the position is usually calculated relative to the base of the robot for this. 
