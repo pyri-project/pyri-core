@@ -569,7 +569,7 @@ To finish the module, you will need 3 USB extension cords, of which, the USB cab
 
 <br><br>
 
-# 6.0: Software Setup for Runtime Computer
+# 6.0: Network Bridge Setup for Runtime Computer
 
 To set up the ethernet connection from the tablet to the network through a bridged connection you can follow the instructions given here: 
 <br><br>
