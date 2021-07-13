@@ -1,6 +1,26 @@
 # PyRI Open Source Teach Pendant Core Module
 
-**WARNING: THIS REPOSITORY CONTAINS UNFINISHED SOFTWARE**
+## Conda Install
+
+Conda is the easiest way to install PyRI. Begin by installing Anaconda or Miniconda with Python version 3.8. Once installed, run the following in a conda prompt to install PyRI:
+
+```
+conda create -n pyri -c conda-forge -c robotraconteur -c pyri-project robotraconteur_training_sim pyri-robotics-superpack
+```
+
+Activate the new conda environment:
+
+```
+conda activate pyri
+```
+
+Now run PyRI:
+
+```
+pyri-core --db-file=my_project.db
+```
+
+To install the training simulator, see https://github.com/robotraconteur-contrib/robotraconteur_training_sim/blob/master/README.md
 
 ## Development Workspace Configuration
 
