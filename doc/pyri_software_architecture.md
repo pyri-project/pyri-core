@@ -1055,6 +1055,7 @@ Each step is stored using the `PyriProgramStep{list}` structure,
 which has the following fields:
 
 | Field Name | Field Type (simplified) | Description |
+| ---        | --- | --- |
 | `step_name` | `string` | Human-readable name of the step |
 | `step_id`   | `UUID` | 128-bit UUID for step |
 | `procedure_name` | `string` | The name of the procedure executed by the step |
