@@ -4,9 +4,9 @@
 
 # Python Restricted Industrial (PyRI) Open Source Teach Pendant Programming Environment Software Architecture
 
-*Version 0.1*
+*Version 0.2*
 
-Last Updated: June 30, 2020
+Last Updated: August 17, 2021
 
 John Wason, Ph.D.
 Owner, Wason Technology, LLC  
@@ -18,12 +18,12 @@ The open-source teach pendant is intended to provide a high-level
 programming environment for use with open-source ecosystems like ROS and
 Robot Raconteur. Developing software for robotics and automation using
 these ecosystems is currently a difficult task, requiring significant
-software development expertise. The open-source teach pendant will
-abstract away the complexities of the open-source ecosystem, and present
+software development expertise. The open-source teach pendant
+abstracts away the complexities of the open-source ecosystem, and present
 the user with either a simplified Blockly or Python programming
-environment. The Blockly or Python programs will interact with ROS
-and/or Robot Raconteur through a series of plugins. These plugins will
-encapsulate the complexity of these ecosystems and provide high-level
+environment. The Blockly or Python programs interact with ROS
+and/or Robot Raconteur through a series of plugins and extensions. These plugins
+encapsulate the complexity of the ecosystems and provide high-level
 functionality. It is assumed that the user is familiar with using
 complex computer software, but are not familiar with software
 development. A good example of a target user is a person familiar with
@@ -32,36 +32,200 @@ of the user program composition and simplified software languages, the
 user programming environment, the software architecture that implements
 this programming environment, and how user software is executed.
 
-# User Programs
+This is the second architecture design, that has been simplified
+from the initial 0.1 version.
+
+# Architecture Overview
+
+The objective of the teach pendant is to allow for high-level
+programming of industrial equipment, such as robots, without
+requiring extensive software development experience. 
+
+The teach pendant software is designed to be highly configurable
+for a variety of industrial applications. For that reason,
+the core software only contains the minimum capabilities required
+to implement the programming environment. All capabilities that
+involve performing a specific task or operating a specific
+type of equipment are contained in extensions.
+
+The teach pendant software consists of a "runtime" component that 
+interacts with the system and runs user programs, and a "WebUI"
+which provides a browser-based user graphical user interface. The
+runtime component provides an HTTP web service, to which a browser
+connects. The user interface is downloaded by the browser as a
+standard web page, and executes as a web application. This design
+allows for users to quickly connect with any modern web browser
+without requiring software installation. It also future-proofs
+the installation, since there is no risk of losing the client
+software or having the client software be incompatible with
+future operating systems.
+
+## Runtime Component
+
+The "runtime" component runs on an industrial computer, and
+becomes a permanent part of the system installation. It is
+mainly developed using Python, using a microservices architecture
+loosely based on serverless computing. Robot Raconteur is used
+to communicate between the various micro-services, between
+the micro-services and the browser, and with other devices
+in the system. The runtime provides the following high
+capabilities:
+
+* Device Discovery and Management
+* User Program Execution
+* Variable Storage Database
+* WebUI Server
+* Service Lifecycle Management
+* Extensibility
+
+The core runtime consists of the following microservices:
+
+* `variable_storage`
+* `device_manager`
+* `devices_states`
+* `sandbox`
+* `program-master`
+* `webui_server`
+* `core` (service lifecycle)
+
+Capabilities for robotics robotics and vision are provided by the
+`pyri-robotics` and `pyri-vision` packages. These packages
+add the following microservices:
+
+* `robotics_jog`
+* `robotics_motion`
+* `vision_viewer`
+* `vision_camera_calibration`
+* `vision_robot_calibration`
+* `vision_aruco_detection`
+* `vision_template_matching`
+
+The details of each service is discussed later in this document.
+
+The runtime component can be extended in two ways:
+
+* Add additional services
+* Add plugins for existing services
+
+Both the additional services and plugins are distributed as standard
+Python packages. This is done using either Wheels or Conda packages.
+
+Adding additional services is straightforward. Develop a Python
+Robot Raconteur service that is compatible with the `Device` concept 
+(see below), and use the `PyriServiceNodeSetup` class included
+in `pyri-common` for node and lifecycle management. These services
+are effectively independent of the rest of the runtime, and can use
+any dependencies that are necessary.
+
+Plugins add functionality to existing services. This is done
+using the `entry_points` specification that is part of the
+Python `setup.py` package file. Services that use plugins
+will scan for the appropriate `entry_points` specified by
+Python packages, and instantiate the provided "factories". Each plugin
+type expects a certain "factory" type instance to be returned by 
+the `entry_points`. For example, the sandbox searches for the
+`pyri.plugins.sandbox_functions` entry point. It expects a factory
+instance of type `PyriSandboxFunctionsPluginFactory` to be returned
+by the entry point. This factory returns the sandbox functions that
+should be made available to the sandbox procedures. The
+`pyri-robotics` package provides the sandbox functions for robotics
+using this method.
+
+## Device Concept
+
+The teach pendant architecture uses the concept of "devices" to
+organize the microservices and available devices on the network.
+Microservices that do not communicate with a physical device
+are considered to be "virtual devices". Every microservice
+or device that wants to communicate with the teach pendant
+must:
+
+* Provide a discoverable Robot Raconteur service
+* Implement the `com.robotraconteur.device.Device` standard Robot Raconteur type
+* Include `DeviceInfo` fields in its service attributes
+
+Every standard Robot Raconteur type for physical devices
+already implements `com.robotraconteur.device.Device`, including
+`com.robotraconteur.robotics.robot.Robot`, the standard type for robots.
+
+The `com.robotraconteur.device.Device` type provides the 
+`com.robotraconteur.device.DeviceInfo` structure through a property 
+member. This structure contains extensive information about the device,
+its class, and its capabilities. This information is used by the
+teach pendant to connect and interact with the device.
+
+## WebUI
+
+The WebUI is provided through the `webui-server` HTTP server. It
+is an advanced web application, which takes advantage of HTML5,
+CSS, JavaScript, and WebAssembly. The web application is
+mostly written in Python. This is made possible by Pyodide,
+a Python scientific software stack that runs in the browser
+using WebAssembly. A highly modified version of Robot Raconteur
+has been combined with Pyodide to create Robot Raconteur Pyodide.
+Robot Raconteur Pyodide implements client communication functionality 
+for use within web browsers using Web Sockets. Pyodide
+includes NumPy, which is a critical library for robotics. Several
+other common JavaScript libraries are used, including but not limited
+to Bootstrap, Vue.js, GoldenLayout, jQuery, Blockly, and Monaco Editor.
+
+The WebUI displays multiple reorganizable panels. These panels can
+be dragged by the user to customize how they are displayed. Without
+extensions, the WebUI has the following default panels:
+
+* Welcome
+* Devices
+* Program
+  * Main (state machine)
+  * Procedure List
+  * Globals List
+  * Output
+
+The `pyri-robotics-browser` and `pyri-vision-browser` extension packages 
+add the following panels:
+
+* Jog
+* Vision
+  * Camera List
+  * Camera Viewer
+
+Like the runtime, the WebUI can be extended using Python packages. The
+WebUI has a sophisticated startup process, that uses Python Wheels to
+contain the WebUI application code. These wheels are stored in a special
+directory for the WebUI server. During startup, all Wheels in this special
+directory are downloaded by the WebUI browser and extracted into the Pyodide
+virtual filesystem. Once extracted, the packages can be used as normal. The
+`entry_points` method, as described above for the runtime component, is used
+for WebUI plugins. This allows for new panels and other enhancements to be
+easily added. Distributing WebUI packages is complex because it requires
+placing the Wheel file in the special WebUI directory. This is best
+accomplished using Conda. See the extension development guide
+for more details.
+
+## User Programs
 
 “User Programs” refers to programs that are developed using the teach
-pendant software. These programs are made up of the following
+pendant software. User programs are stored in a database file, which
+serves as the save file for project. Typically SQLite is used. 
+
+User programs are made up of the following
 components:
 
 - A top-level state machine that executes procedures and selects the
 next state based on the output of the procedures
 - A set of procedures developed using either Blockly or the Restricted
 Python Dialect
-- A set of reusable functions for Blockly or the Restricted Python
-Dialect
 - A set of global variables
+  - Stored using Robot Raconteur data types and serialization
   - May be generic data structures, or specific types such as Waypoints
-  - May be constant, ephemeral, or persistent
-  - Custom structure types can be defined by user
-- A set of global parameters
-- A group of plugins that implement additional functionality
-  - Interact with hardware or provide advanced capabilities
-  - Developed in normal Python 3.6 or greater
-  - Can be individual instances of plugins and/or plugin factories
-- A set of signals
-  - Input, output, or both
-  - Built in or provided by plugins
-- Custom production interface panels for interacting with state
-machine
-- Notes and Documentation
-- Resources, such as images, video, sounds, meshes, etc
+  - May have four persistence levels: temporary, normal, persistent, or constant
+  - (Resources used by the program are stored as constants)
 
-# User Program State Machine
+User programs interact with the rest of the teach pendant software and 
+devices in the system using "sandbox" and "blockly" plugins. These
+concepts are explained further in the sandbox service section.
+
+### User Program Main State Machine
 
 The top level of a user program is the state machine. State machines are
 nearly always used as the high level construct for automation programs,
@@ -114,26 +278,22 @@ for experienced programmers.
 The top level of a user program consists of a state machine with
 multiple steps. Each step executes a procedure, and selects the next
 state based on the result of the procedure. Procedures may be
-implemented using Blockly, Restricted Python Dialect, or be plugin
-functions. It is possible that many user programs will be able to be
+implemented using Blockly or the Restricted Python Dialect.
+It is possible that many user programs will be able to be
 developed as state machines without needing to implement any Restricted
-Python Dialect or Blockly procedures. Each step is assigned a name, and
-optionally a category.
+Python Dialect or Blockly procedures. Each step is assigned a name.
 
-Each step of the state machine will be able to pass parameters to and
-execute a single procedure. The parameters may be global variables,
-signals, or constants. These parameters are fixed to the specified
-variable, signal, or constant. The state machine will then be able to
+Each step of the state machine is able to pass parameters to and
+execute a single procedure. The parameters are plain strings passed
+to the procedure. The state machine is able to
 select the next state based on the result of the procedure. The state
-machine itself will not have any logic available beyond selecting the
+machine itself does not have any logic available beyond selecting the
 next state. This selection will be based either on a string returned by
-the procedure on success, or the type of exception on failure. Steps may
-also list which steps may or may not proceed the step.
+the procedure on success, or the type of exception on failure.
 
-The following is an example of what a few steps in a state machine may
-look like:
+The following is an example of a state machine in the editor panel:
 
-![](figures/pyri_software_architecture/state-machine.jpg)
+![](figures/pyri_software_architecture/state-machine.png)
 
 The state machine is designed to allow for the user to arbitrarily jump
 to a step of the program. The ability to jump around is possible because
@@ -143,37 +303,23 @@ steps, the steps can be executed in arbitrary order (within the
 specified limits of the program) without losing data integrity.
 
 The state machine is also designed to allow for the program to be
-continued after the system has been power cycled. To accomplish this,
-the state machine has four different modes:
+continued after the system has been power cycled. This is
+accomplished by storing the current state and the state machine data
+in the program database.
 
-- **Main:** The main program that executes the process
-- **Startup:** Always called when the program is loaded regardless of main
-- **Shutdown:** Always called when the program is unloaded regardless of main
-- **Events:** Called when an event is generated. The event may be executed between steps, run concurrently to the current step, force a state change, or terminate the program
+Currently, the state machine does not have the ability to handle
+asynchronous events, or have special capabilities for startup and
+shutdown. These capabilities can be added in the future.
 
-The startup and shutdown modes are used to initialize and shutdown the
-runtime environment for the program. These modes should not accomplish
-any physical task.
-
-The event mode is called when a specific event occurs. Each event has
-its own set of steps, and has the following dispatch modes:
-
-- **Wait:** wait for the next step transition to occur
-- **Concurrent:** run the event concurrently to the running step
-- **Interrupt:** pause the current step until the event routine is complete
-
-The event routine has the ability to modify global variables, force a
-state change, or terminate the program. It should not attempt to send to
-commands to devices or modify the environment directly.
-
-# Procedures and Functions
+### Procedures
 
 User defined procedures are used to execute program logic. They are
 called by the state-machine steps, or from other procedures/functions.
 Procedures accept parameters, can read and write global variables, can
-interact with plugins, can raise errors, and can specify a return value
-string. The return value or exception is used to determine the next step
-the state machine should execute. Procedures are not persisted between
+interact with plugins, can raise errors, and can specify a result value
+string. The result value or exception is used to determine the next step
+the state machine should execute. Procedure variables are not persisted 
+between
 system restarts. Any local data and stack information is lost when the
 procedure is exited or aborted by a shutdown. Data that must be retained
 should be stored in the global variable table.
@@ -187,52 +333,12 @@ environment is available using plugins, which can be called from the
 restricted Python environment. It is expected that plugin developers
 will have the experience to reliably use the full feature set of Python.
 These plugins are then available to less skilled developers using the
-teach pendant interface.
-
-One option for creating the Python sandbox is the RestrictedPython
-project \[1\]. This project restricts the execution of Python bytecode
-to a subset of the standard Python capabilities. Sandboxing is a
-difficult computer science problem and will require significantly more
-work before it can be fully implemented. RestrictedPython can also
-potentially be used to track and regulate the execution of Python
-software by using the Python pdb debugger module. (Note that
-RestrictedPython is a separate concept from the Restricted Python
-Dialect that is being developed for this project.)
-
-RestrictedPython uses “Policies” to decide what commands and syntax are
-allowed. The teach pendant project will define a policy for use with
-RestrictedPython. While the exact limitations are still being decided,
-the following language features have currently been selected for
-restriction:
-
-- import (with pre-imported safe modules)
-- file access
-- classes
-- metaclasses
-- closure
-- lambda
-- function handles
-- generators
-- input
-- threading
-- selected builtins (allow builtins defined by RestrictedPython.safe\_bultins and RestrictedPython.limited\_builtins)
-
-Simple utility libraries like the “Pure Python Linear Algebra” \[2\]
-should be provided within the restricted Python environment. The exact
-libraries that will be made available will be decided during the
-development of the environment.
-
-The exact feature set and limitations of the Restricted Python Dialect
-will be discussed in a future document.
-
-Procedures will always be “awaitable” functions, as defined by the
-Python Coroutines and Tasks documentation \[3\]. Plugins will frequently
-execute network commands, communicate with hardware, or execute a long
-running operation. Without using “await”, the plugin would block the
-main program thread.
+teach pendant interface. See 
+[pyri_dialect_specification.md](pyri_dialect_specification.md) for more
+information on the restricted Python dialect.
 
 Procedures may optionally be developed using Blockly instead of Python.
-This may be an attractive option for users who are not experienced
+This is an attractive option for users who are not experienced
 programmers. Blockly and the closely related MIT Scratch visual
 programming languages are very popular in education and are widely used
 in primary and secondary schools. Programs written in Blockly are
@@ -248,472 +354,879 @@ function calls.)
 
 ![](figures/pyri_software_architecture/blockly1.jpg)
 
-Functions are similar to Procedures but are not callable by steps. The
-are intended to be called from other procedures and/or functions.
-Functions may or may not be awaitable and may optionally return a value.
-They may access global variables. They may interact with plugins but
-must be marked as awaitable to do so.
+Sandbox functions are special functions that are made available within
+the sandbox for procedures to use. These functions are "injected" into
+the procedure execution context when the procedure is executed.
+These functions are included in the base software installation, and
+by plugins to add specialized functionality. The base software
+and plugins may also provide corresponding Blockly blocks that
+call sandbox functions, so that they can be accessed using the
+visual programming environment.
 
-Functions and Procedures that only use “const” operations on global
-variables, plugins, and signals can be used as “const”.
-
-Procedures and Functions are organized into modules containing one or
-more procedure and/or function. This is similar to Python modules and
-Blockly workspaces. Modules may not contain module level variables. All
-global variables must use the global variable table.
-
-The global variable container type is used to store structure types at
-the local variable scope.
-
-# Global Variables
+### Global Variables
 
 Global variables exist at the top level of the user program, alongside
-the state machine. The global variables are stored an a table that can
-be edited by the user. These variables can have different types,
+the state machine. The global variables are stored in a database,
+typically SQLite. The `variable_storage` service implements the database
+and variable functionality. These variables can have different types,
 including taught waypoints.
 
-Global variables can have one of three storage levels:
+Global variables can have one of four storage levels:
 
-- **Constant:** Always the value set by the user
-- **Ephemeral:** Deleted on program exit
+- **Temporary:** Deleted on program exit
+- **Normal:** Cleared to default on program restart
 - **Persistent:** Maintain the current value after program or system restarts. Optionally have a specified constant default value. May optionally be set to default value on program start
+- **Constant:** Always the value set by the user
+
 
 The global variable table can be “reset to default”, which immediately
-deletes all ephemeral global variables and sets persistent variables to
+deletes all temporary global variables and sets normal/persistent variables to
 default.
 
-Global variables may be accessed and set by procedures, functions, and
-plugins. Procedures, functions, and plugins may also create, delete, and
-change the storage level of global variables.
+Global variables may modified by procedures, sandbox functions,
+plugins, and services.
 
-Global variables must have an assigned type. This type must be
-convertible to a Robot Raconteur structure. These types may be defined
-by the teach pendant system, the user, or by plugins.
-
-Global variables are stored in a Python container class. This container
-class will be configurable and store all global variable types. There
-are not individual Python classes for each variable type.
-
-Reading a global variable is a “const” operation.
+Global variables must have an assigned type. This type must correspond
+to a known Robot Raconteur type. The known Robot Raconteur types can
+be expanded using the `pyri.plugins.robdef` plugin type.
 
 The user can modify global variables using a graphical user interface
-editor. This editor is part of the teach pendant user interface. Each
-variable type may optionally have a specialized editor. For example,
-waypoints will have a specialized editor to allow for capturing
-waypoints from a physical robot or using visualization. Plugins may
-provide specialized editors.
-
-Global variables may require scoping, depending on the complexity of
-developed software.
-
-# Global Parameters
-
-Global parameters are similar to constant global variables but are
-intended to be configured in the future. For example, the URL of a robot
-may change. The global parameters are stored separately, so future users
-know which settings should be changed. Automated configuration systems
-can also interrogate and modify global parameters. Reading a global
-parameter is a “const” operation.
-
-# Plugins
-
-Plugins are used to extend the functionality of the teach pendant
-software. The built-in functionality of the teach pendant software will
-be very limited, with the expectation that most of the functionality
-will be made available through plugins.
-
-Plugins may have the following contents
-
-- A plugin factory that creates the other elements and contains metadata about the plugin
-- Object that implement functionality and can be interacted with using the state machine, procedures, and functions
-- Global variable types
-- Global variables
-- Global variable types editors
-- Signal indicators/controls
-- Plugin configuration editors
-- User interface panels
-- Widgets for custom production panels
-
-Plugins must contain one plugin factory and may contain any combination
-of the other elements.
-
-The plugin factory is the entry point into the plugin, containing
-metadata about the plugin contents and access to the other available
-plugin contents. Plugins follow a similar design to Python Wheels \[5\],
-with the addition of a plugin factory. (If possible, the plugins will be
-distributed as Wheels.)
-
-The plugin factory will contain the following metadata:
-
-- Plugin name
-- Version
-- Summary
-- Description
-- Keywords
-- Homepage
-- Download-URL
-- Author
-- Author-email
-- Maintainer
-- Maintainer-email
-- License
-- UUID
-- Project-URL
-- Supported teach pendant software version
-- Plugin components
-  - Object names and descriptions
-  - Global variables names and descriptions
-  - Global variable types names and descriptions
-  - Global variable types editors names and descriptions
-  - Widgets names and descriptions
-- Dependencies
-
-Custom metadata is stored within the plugin using yaml or json. Plugins
-can be detected using the pkg\_resources module included with setuptools
-\[6\]. pkg\_resources finds all installed packages, and can retrieve the
-plugin metadata files for the packages. These metadata files can then be
-interrogated to find available plugins.
-
-## Plugin Factories
-
-The plugin factory will have a series of standard functions used to
-instantiate the available contents. This instantiation can either be
-done using the user program plugin configuration editor, or at runtime
-using procedures and/or functions. The user program plugin configuration
-editor will allow the user to select which plugins are in use, which of
-the contents to instantiate, and the parameters to pass to the content
-being instantiated. The plugin configuration editor instantiates the
-plugins during the program startup phase, using the parameters
-specified. Parameters can either be local constants, global constants,
-or global parameters. If more control is needed, the plugin content can
-be instantiated using commands in Python or Blockly.
-
-## Plugin Objects
-
-Plugin objects are the primary way that the teach pendant interacts with
-the rest of the system and the outside world. The teach pendant is
-“object-based”, similar to Visual Basic Script or other simplified
-programming environment. The simplified programming languages can
-consume objects but are not capable of defining object. For simplicity,
-there is no concept of inheritance or polymorphism for plugin objects.
-
-Plugin objects have the following member types:
-
-- Properties – Properties that can be read or written, depending on behavior
-- Procedures – As described in the Procedures and Functions section
-- Functions – As described in the Procedures and Functions section
-- Signals – Inputs and/or outputs
-- Events – Events that trigger the state machine to enter an event state
-
-Plugins are standard Python objects that extend from a master plugin
-object base class. The member requests are proxied through dispatch
-function, for example “get\_property”, “set\_property”, “call\_function”
-etc. The user Python or Blockly are provided with a more intuitive
-version that has standard property and function access. The exact design
-for these proxy interfaces is currently not defined. The member
-operations will be marked as “const” if they can be safely called
-without changing the object state. Dispatch functions are always
-“awaitable” Python function. This is done to prevent blocking of the
-main thread.
-
-The plugin objects will be accessed from Blockly using dispatch
-functions, which take the plugin and the name of the member as
-arguments. Optionally, the plugin may provide custom Blockly blocks for
-display in the palette. The existence of these custom blocks is
-specified in the plugin metadata, and the js and json files that define
-the custom blocks are included in the plugin wheel.
-
-Plugins are instantiated using the plugin factory. The existence of the
-object type and a description is included in the plugin metadata.
-
-Conceptually, each physical or logical device being used by the teach
-pendant will have a plugin object representing it.
-
-## Global Variable Types
-
-Custom global variable types can be defined in plugins. These global
-variable types must be compatible with Robot Raconteur structure types.
-These types can be used in the global variable table, in user defined
-Python or Blockly, or in the plugins.
-
-The available custom global variable types are defined in the plugin
-metadata.
-
-## Global Variables
-
-Some plugins may require specific global variables. These can be
-specified by the plugin in the plugin metadata. The global variable
-type, name, and storage type are specified.
-
-## Global Variable Type Editors
-
-Variable types may have specific behavior. Custom variable editors can
-be specified in the plugin metadata, with the html, js, and json files
-required to implement the custom editor included in the python wheel.
-
-## Signal Indicators and Controls
-
-Some signals may have special behavior that is better served by a custom
-indicator or control. Plugin provided signal indicators/controls can be
-specified in the plugin metadata, with the html, js, and json files
-required to implement the custom editor included in the python wheel.
-
-## Plugin Configuration Editors
-
-Plugins may need special configuration steps, such as connection to a
-robot and reading parameters. For this reasons, plugins may provide
-custom configuration editors that implement extra logic. These editors
-will run entirely within the user interface and be developed in html,
-js, and json. These files are contained in the Python Wheel, and the
-custom editor is specified in the plugin metadata.
-
-## User Interface Panels
-
-Plugins may need to add additional panels to the user interface. For
-instance, a plugin representing a robot may need to add a jog panel, or
-a PLC may need to add a panel to change signal values. These panels will
-run within the user interface, and be developed in html, js, and json.
-These files are contained in the Python Wheel, and the custom editor is
-specified in the plugin metadata.
-
-These panels will either be independent of the currently running user
-program or will interact with the currently loaded user program. The
-behavior of these panels is left to the plugin author.
-
-## Custom Panel Widgets
-
-Custom panel widgets can be included in the plugin. These widgets are
-used on user defined panels. Custom widgets can be specified in the
-plugin metadata, with the html, js, and json files required to implement
-the custom editor included in the python wheel.
-
-# Signals
-
-Signals are used to communicate with outside devices and logical
-devices. Signals are often implemented as a digital or analog wire
-connected to a device. This wire can be an input, an output, or both.
-Signal are implemented in Robot Raconteur using the “wire” member, and
-signals in the teach pendant will have similar behavior to Robot
-Raconteur wires.
-
-In the teach pendant, signals are either built into the core software,
-or provided by plugins. Almost all signals will be provided by plugins.
-The global symbols are provided by global plugin objects that have been
-configured by the user using the global plugin configuration editor.
-Once a plugin object has been configured, the signal provided by that
-object are made available in the global signal editor. These signals can
-be configured for use by the user software, other plugins, for the
-custom user panel, or set to trigger an event.
-
-Signals can be read and written from procedures, functions, and plugins.
-They can be used to generate events and can be displayed on user panels.
-
-Reading a signal is a “const” operation.
-
-# Custom User Interface Panels
-
-A user interface panel editor will be available for building production
-time panels. These panels will be used when the automation system is
-running in production mode, after programming is complete. It is assumed
-that the users during production are not engineers but are rather
-workers trained to operate the automation system. These production user
-interface panels must be very simple and intuitive, giving the minimal
-amount of information and control required to operate the system.
-
-The panel editor will prevent a blank panel and a palette of widgets to
-place on the panel. The widgets will either be built into the core teach
-pendant software or provided by plugins. The widgets will either be
-indicators or controls. For indicators, the widget will display a global
-variable, or the output of a function. This function will be defined in
-user Python, Blockly, or a plugin. (All operations must be “const”.) It
-will be called every screen update. For the controls, the widget will
-set a global variable and or trigger an event. Because of the
-asynchronous nature of panel input, they cannot safely call procedures,
-functions, or plugins.
-
-Custom user interface panels will be capable
-
-# Notes and Documentation
-
-Notes and documentation creation will be integrated into the user
-program editor. These files will be Markdown.
-
-# User Program Save File Format
-
-The user programs and associated data like variables, parameters, and
-plugin configuration are saved to disk for permanent storage. The file
-formats and directory structures will be designed to be stored on GitHub
-or other git repository. For this reason, all file formats must be plain
-text. The exception is resource files which may be binary. These
-resources are not directly edited or maintained by the teach pendant. It
-is expected that the files will consist of the following formats:
-
-- Python Code
-- XML
-- YAML
-- JSON
-- Markdown
-- Resources buckets, possibly binary
-
-The programs will follow the conventional Git directory structure, with
-the following contents:
-
-- License file
-- README.md file
-- .gitignore file
-- src/ directory, containing python and blockly code
-- docs/ directory, containing notes taken
-- config/ directory, containing default parameters, global variable default names and variables, and plugin configuration
-- state/ directory, containing the current global variable table, current execution state, current signal values, and current plugin configuration. This will normally be set to “ignore” since it is not directly transferable to other users.
-- resources/ directory, containing binary resources used by the program
-- panels/ directory, containing user defined panels
-
-The teach pendant software will use git internally to manage and version
-control software being developed by users. User programs can be
-distributed using GitHub and similar repositories. A marketplace can
-potentially be set up that tracks the available plugins and
-automatically installs them from GitHub.
-
-Plugins will be stored in Python Wheel format. These wheels must have
-the correct metadata file for the teach pendant. There are no specific
-requirements for plugin file formats beyond these two requirements.
-
-# User Program Runtime Environment
-
-The teach pendant system is broken up into two separate computing units:
-the teach pendant (or laptop) which serves as the programming user
-interface, and a runtime computer that stores and executes the programs.
-The runtime computer interfaces with the user interface through a
-“program manager”. This manager maintains a connection with the user
-interface, manages the program files, starts user programs, and manages
-the lifecyle of the running user programs. The user programs themselves
-run in a separate process. The plugins are loaded into the user process,
-meaning they have the same lifecycle as the user program. The user
-program processes will have some level of sandboxing to prevent damage
-to the rest of the system from errant programs. This sandboxing may
-consist of restricting the allowed commands by the user software,
-running the user process in a chroot environment, running in a
-container, and/or some other method to be determined in the future.
-
-The operation of the teach pendant will be logged, with different levels
-of logging set by the user. Plugins may optionally send logging
-information to the teach pendant logging system.
-
-# User Program Editor
-
-The user program editor is an IDE designed for editing user programs.
-The user program editor may optionally be extended with additional
-panels by the plugin to implement specialized functionality, like robot
-jogging, variable editing, plugin object configuration, etc.
-
-The user program editor will be implemented entirely in HTML, CSS,
-JavaScript, and other web browser compatible technologies like
-WebAssembly. This design choice will result in software that is fully
-portable between clients and can be provided over the network without
-requiring installation. (JavaScript here includes compile-to-JavaScript
-technologies like TypeScript and Bridge.NET.) Pyodide \[7\] is a
-potential option for a programming environment, allowing full a Python
-runtime within the browser. Unfortunately, the performance has been
-uninspiring compared to the JavaScript based options, so it is not
-currently being considered. Improving the performance of Pyodide will be
-investigated to determine if it is a feasible option.
-
-The user program editor will have, at minimum, the following panels:
-
-- Top-level (independent of active user program)
-  - Welcome screen
-  - Help Navigator
-  - User Program Manager/File Explorer
-  - Plugin manager
-  - System configuration
-  - Diagnostics
-  - About page
-  - System manager/software update
-  - Login and user manager
-  - Panels provided by plugins
-- User Program Panels
-  - Program metadata panel
-  - Documentation editor
-  - State machine editor
-    - Sub-editors for main, startup, shutdown, and events
-  - Procedure and Function editor
-    - Python editor (with linting if possible)
-    - Blockly editor
-  - Parameters editor
-    - Plugin provided parameter editor panels
-  - Global variable editor
-    - Plugin provided global variable editor panels
-  - Signal configuration editor
-    - Plugin provided signal indicators/controls
-  - Plugin configuration editor
-    - Plugin provided specialized configuration panels
-  - Custom production panel editor
-  - Standard production window
-  - Plugin provided panels
-  - Log viewer
-- Production mode panels
-  - Standard production panel
-  - Custom production panels provided by user program
-  - Diagnostics screen
-  - Production mode documentation from user program
-  - Log viewer
-
-The user program editor may optionally be integrated into another
-existing IDE. A compelling option is to integrate the teach pendant
-programming user interface into Visual Studio Code \[8\] or the closely
-related Eclipse Theia \[9\]. Visual Studio Code is an IDE developed by
-Microsoft that uses Electron \[9\] as its runtime environment. Electron
-is based on Google Chromium \[10\], and is essentially a web browser
-operating as a standard application.
-
-Visual Studio Code is highly customizable using extensions. The teach
-pendant can implement custom Side Bars (B), Editors (C), and Panels (D).
-Extensions can use the “Webview API” \[12\], allowing what are
-essentially normal web pages to be displayed in an editor or other
-panels. This provides an easy way to integrate the teach pendant panels
-into Visual Studio Code.
-
-Visual Studio Code has the disadvantage that it is an installed program
-and cannot be served from a web server without installation. Eclipse
-Theia is a closely related project, originally based on Visual Studio
-Code, that can be served from a web server. It has support for Visual
-Studio Code extensions, which avoids the installation problem.
-
-Using an existing IDE like Visual Studio Code is desirable because it
-already has significant functionality, and a large user base. Many of
-the basic issues of developing an IDE like window layout, version
-control integration, syntax highlighting, etc, are already implemented.
-Being an extension to an existing editor also makes it more approachable
-for the programming community.
-
-The primary challenges with Visual Studio Code and Eclipse Theia are the
-lack of touch screen support, and the design of remote extension
-communication.
-
-Visual Studio Code and Theia use a layout that is not touch-screen
-friendly. The user interface is also far too busy for use by novice
-programmers. The user interface would need to be customized to reduce
-the clutter, and adjust the arrangement of elements for use with a
-touchscreen. While it may be possible to achieve these modifications
-with extensions alone, fully changing the layout may require patching
-the source code of the IDEs. Whether or not this is worth the effort is
-yet to be determined.
-
-Visual Studio Code and Theia have the concept of “remote extensions”,
-where the user interface part of the extensions runs in the editor,
-while a server on a remote machine runs the backend part of the
-extension. Visual Studio Code uses SSH and/or sockets to achieve this
-communication with a proprietary protocol, while Theia uses Json RPC. It
-is unclear if this design of remote communication is compatible with the
-architecture of the teach pendant, or if it is feasible to implement an
-option that is compatible.
-
-Deciding if it makes sense to integrate with Visual Studio Code or Theia
-will require further research and experimentation.
-
-The design of the program editor should attempt to borrow concepts from
-the computer gaming industry to make programming easier and more
-familiar to users.
+editor in the WebUI, if a matching editor is available. Each
+variable type may optionally have a specialized editor. Additional
+variable type editors can be provided using plugins.
+
+# Runtime
+
+The runtime component consists of several microservices that
+implement the backend functionality of the teach pendant. The runtime
+is a permanent part of the system, while the teach pendant
+can be disconnected and removed if it is no longer needed after
+programming is complete. The runtime component communicates with
+the rest of the system and executes the developed software. The
+prototype teach pendant hardware uses an Intel NUC for the runtime
+computer, although any moderately powerful industrial computer
+should be sufficient, depending on the extensions used. For instance,
+motion planning using the Tesseract extension package will need a more
+powerful computer compared to running only the base software.
+
+The runtime has the capability to launch and manage the lifecycle
+of the relevant microservices. This is implemented using the
+`pyri-core` service.
+
+## variable_storage Service
+
+* Python Package: `pyri-variable-storage`
+* Conda package: `pyri-robotics-superpack`
+* Service: `pyri-variable-storage-service`
+* robdef: `tech.pyri.variable_storage`
+* Repo: https://github.com/pyri-project/pyri-variable-storage
+
+All data for the active program including, but not limited to,
+added devices, procedures, global variables, state machines,
+and any other program related data are stored in the global
+variable table. This table is implemented using SQLAlchemy, a
+database toolkit for Python. SQLAlchemy supports several backend
+databases, including SQLite, PostgresSQL, MySQL, and Microsoft
+SQL Server. Typically, SQLite is used since it is the simplest,
+and results in a single save file. (SQLite is desirable as a
+save format for an open-source project, since it is easily
+readable from any major programming environment.)
+
+The global variable table has the following fields:
+
+
+| Field name | Field type | Description |
+| ---        | ---        | ---         |
+| name       | String(512) | Name of the variable |
+| device     | String(128) | Name of the device that owns the variable |
+| datatype  | String(128) | Robot Raconteur data type string |
+| value      | LargeBinary | The data serialized as a Robot Raconteur message element |
+| reset_value | LargeBinary | The reset value serialized as a Robot Raconteur message element |
+| persistence | Integer | The persistence of the variable to reboots and resets |
+| default_protection | Integer | The default protection level of the variable |
+| doc | Text() | Documentation for the variable |
+| created_on | LargeBinary | Robot Raconteur serialized time stamp |
+| updated_on | LargeBinary | Robot Raconteur serialized time stamp |
+| tags       | string array | Tags to describe the category and usage of variable |
+| attributes | string dict | Key value string pairs for general purpose metadata |
+| permissions | | User and group access permissions |
+
+Variables in the table are scoped by "device" name. For instance,
+the device name "device_manager" is used to store data for the
+`device_manager` service. Several special "device names" are
+reserved and used for program storage: "globals", "program",
+and "procedure", which are used to store program data.
+
+Each variable has a "name", which must be unique within the
+device scope.
+
+Each variable has a "value" and a "reset value". "reset values"
+are optionally specified for when the user requests a program
+reset. The persistence of the variable controls when the
+value of the variable is reset.
+
+Variables can have four levels of persistence:
+
+- **Temporary:** Deleted on program exit
+- **Normal:** Cleared to default on program restart
+- **Persistent:** Maintain the current value after program or system restarts. Optionally have a specified constant default value. May optionally be set to default value on program start
+- **Constant:** Always the value set by the user
+
+Each variable has "tags" and "attributes". Tags are short plain strings
+used to provide context to the variable. For instance, tags are used to
+specify that a numeric array should be used as a waypoint, instead be
+treated as a plain array. Attributes are string key/value pair that
+can be used to store arbitrary data.
+
+The variable values are stored as serialized Robot Raconteur types.
+In order to correctly serialize the data, the `variable_storage` 
+service must have the corresponding `robdef` registered with the node.
+This requirement is due to the peculiar asymmetry of Robot Raconteur.
+Robot Raconteur is designed to provide arbitrary `robdef` type 
+definitions to the client, so that the client does not need to have
+any a priori information to access the service. The reverse is not true.
+The service is not able to receive and understand an arbitrary type.
+`variable_storage` uses the `pyri.plugins.robdef` plugin type
+to add additional `robdef` service definitions to the node. The plugin
+instances provide the full text of the service definition, which is
+registered with the node on startup. **If the plugin configuration 
+is changed, the `variable_storage` service must be restarted.**
+
+The variable storage service exposes the Robot Raconteur service
+`variable_storage` with type `tech.pyri.variable_storage.VariableStorage`.
+
+The `variable_storage` service is started by `pyri-core` and is added
+as a default device using the `pyri.plugins.service_node_launch`
+plugin type.
+
+The current variable table design does not have any provisions
+for hierarchy of variables. For instance, sequences and trees
+of variables are poorly handled. Currently, sequences are implemented
+as string lists of variable names, and trees are handled using attributes.
+Future development should provide a more consistent way to handle
+these relationships.
+
+## device_manager Service
+
+* Python Package: `pyri-device-manager`
+* Conda package: `pyri-robotics-superpack`
+* Service: `pyri-device-manager-service`
+* robdef: `tech.pyri.device_manager`
+* Repo: https://github.com/pyri-project/pyri-device-manager
+
+The teach pendant software is organized around the concept of
+"devices". This concept is based on the [Robot Raconteur standard
+types](https://github.com/robotraconteur/robotraconteur_standard_robdef).
+All standard device objects implement the `com.robotraconteur.device.Device`
+type. This type has a single readonly property member `device_info`, which
+returns a `com.robotraconteur.device.DeviceInfo` structure. This structure
+contains the following fields:
+
+| Field name | Field Type (simplified) | Description |
+| ---        | ---                     | ---         |
+| `device`     | `Identifier`              | Unique identifier for this device |
+| `parent_device` | `Identifier`           | An optional "parent" device. Used for compound devices |
+| `manufacturer`   | `Identifier`           | The manufacturer of the device |
+| `model`          | `Identifier`          | The model of the device |
+| `options`        | `DeviceOption{list}`        | A list of installed device options |
+| `capabilities`   | `DeviceCapability{list}`    | A list of capabilities provided by the device |
+| `serial_number`  | `string`              | The serial number of the device |
+| `device_classes` | `DeviceClass{list}`   | A list of device classes. "Device class" is separate from software class |
+| `user_description` | `string`            | A user defined description of device |
+| `description_resource` | `ResourceIdentifier` | A resource that provides additional files about the device |
+| `implemented_types` | `string{list}` | A list of Robot Raconteur object types implemented by the device |
+| `device_origin_pose` | `NamedPose` | The origin of the device in the workspace, or relative to the parent device |
+| `associated_devices` | `Identifier{string}` | A map of devices that are associated with this device |
+| `extended` | `varvalue{string}` | Future-proofing field to hold additional information |
+
+The `DeviceInfo` structure contains critical information
+for the teach pendant software to interact with devices.
+
+All services that the teach pendant interact with
+are considered "Devices". Software-only devices
+such as the core microservices that make up the
+core software are considered "virtual devices", although in
+practice this has no distinction an the software level.
+All services that the teach pendant interacts with
+must provide a `DeviceInfo` structure by implementing the
+`Device`  standard type for the teach pendant to
+recognize the service.
+
+Devices are distinguished using Robot Raconteur `Identifiers`,
+implemented by the `com.robotraconteur.identifier.Identifier`
+type. The Identifier type has the following fields:
+
+| Field Name | Field Type (simplified) | Description |
+| ---        | ---                     | ---         |
+| `name`     | `string`                | A human-readable name, not required to be unique |
+| `uuid`     | `UUID`                  | A 128-bit gen-4 UUID, required to be unique |
+
+`Identifiers` are designed to allow for identification using
+either a human-readable string name, or a 128-bit UUID.
+UUID (Universally Unique Identifier) is a randomly generated
+128-bit number that is statistically guaranteed to be unique. UUIDs
+are heavily used in computer systems to generate unique ids
+without requiring a central authority to distribute ids. Robot Raconteur
+Identifiers allow for either the name, the UUID, or both
+to be used for identification. A blank string or a zero UUID
+are considered "wildcard", and will be ignored during
+identifier matching.
+
+Robot Raconteur Discovery is used to detect devices. The device manager
+searches for `com.robotraconteur.device.Device` services on
+the local network. IPv6 addresses or local connections are favored.
+Devices are expected to have a static IPv6 address. They will need
+to be removed and added again if the connection URL changes.
+**Services that are connected by the WebUI must have IPv4
+discovery enabled**. This is done using the
+`--robotraconteur-tcp-ipv4-discovery=true` command line argument
+or the `RobotRaconteurNodeSetupFlags_TCP_TRANSPORT_IPV4_DISCOVERY`
+node setup flag. IPv4 discovery is disabled by default.
+
+The device manager stores the selected devices with
+an assigned "local name". The local name is an alias
+assigned to refer to the device within the teach pendant
+software. This is typically a short name like `robot`
+or `joystick`. The device manager returns the full
+information and/or creates connection to a device
+based on this local name.
+
+The following table contains the typical local
+names of devices on a fully configured
+system. Several local devices are required for
+normal operation:
+
+| Local Name | Robot Raconteur Type | Service | Package | Required |
+| ---        | ---         | ---      | ---   | --- |
+| `variable_storage` | `tech.pyri.variable_storage.VariableStorage` | `pyri-variable-storage-service` | `pyri-variable-storage` | Yes |
+| `device_manager`   | `tech.pyri.device_manager.DeviceManager`     | `pyri-device-manager`           | `pyri-device-manager`   | Yes |
+| `devices_states`   | `tech.pyri.devices_states.PyriDevicesStatesService` | `pyri-devices-states-service`| `pyri-devices-states` | Yes |
+| `sandbox`          | `tech.pyri.sandbox.PyriSandbox` | `pyri-sandbox-service` | `pyri-sandbox` | Yes |
+| `program_master`   | `tech.pyri.program_master.PyriProgramMaster` | `pyri-program-master-service` | `pyri-program-master` | Yes |
+
+The `pyri-webui-server` and `pyri-core` services do not currently expose Robot Raconteur services.
+
+The `pyri-robotics` and `pyri-vision` packages are frequently installed,
+and use the following local names:
+
+| Local Name | Robot Raconteur Type | Service | Package | Required |
+| ---        | ---         | ---     | ---     | ---      |
+| `robotics_jog` | `tech.pyri.robotics.jog.JogRobot` | `pyri-robotics-jog-service` | `pyri-robotics` | Yes |
+| `robotics_motion` | `tech.pyri.robotics.motion.RoboticsMotionService` | `pyri-robotics-motion-service` | `pyri-robotics` | Yes |
+| `vision_camera_viewer` | `tech.pyri.vision.viewer.CameraViewer` | `pyri-vision-camera-viewer-service` | `pyri-vision` | Yes |
+| `vision_camera_calibration` | `tech.pyri.vision.calibration.CameraCalibrationService` | `pyri-vision-camera-calibration-service` | Yes |
+| `vision_robot_calibration` | `tech.pyri.vision.robot_calibration.CameraRobotCalibrationService` | `pyri-vision-robot-calibration-service` | Yes |
+| `vision_aruco_detection` | `tech.pyri.vision.aruco_detection.VisionArucoDetectionService` | `pyri-vision-aruco-detection-service` | Yes |
+| `vision_template_matching` | `tech.pyri.vision.template_matching.VisionTemplateMatchingService` | `pyri-vision-template-matching-service` | Yes |
+
+The device manager stores the added devices in the `variable_storage` service,
+with the device name `device_manager`. Each device is stored in a single variable,
+with local name of the device used as the variable name. The variable
+entry has the type `tech.pyri.device_manager.PyriDeviceInfo`.
+
+The device manager attempts to create a persistent connection to 
+the `variable_storage` service. It either finds the `variable_storage`
+service using discovery, discovery with a specified Identifier, 
+or through a provided URL. The connection options are configured
+using command line options for the device manager. By default,
+it will look for `variable_storage` available using the local
+transport, connecting to a service running on the same computer.
+
+The device manager provides a `DeviceManagerClient` class, which
+is contained in the `pyri-common` package. The `DeviceManagerClient`
+queries the device manager and either provides information
+or creates persistent connections to other devices. The
+device manager client needs to connect to the device manager. This
+is done either using discovery, discovery with a specified
+Identifier, or through a provided URL.
+
+(Note that the device manager connecting to the `variable_storage`
+service or the device manager client connecting to the `device_manager`
+is different than the typical device connection process, since it
+precedes using the device manager. Raw Robot Raconteur discovery
+or a Robot Raconteur URL is used to establish these initial connections.)
+
+Each service, each client, and the WebUI, which interacts with devices
+needs to run an instance of the `DeviceManagerClient`. This is the
+core functionality provided by the software to establish connections.
+
+By default, the `DeviceManagerClient` will connect to all
+available devices. Since this is often unnecessary, it
+can be configured to connect only to devices with specified
+local names or specified types.
+
+When a new `variable_storage` database is created, it will
+have no devices added, and the software cannot function.
+`pyri-core` will automatically add devices based on instructions
+located in each package as `entry_points` plugins.
+
+Devices can be added and removed using the `device_manager` service
+object API, or using the WebUI. Most users will use the
+WebUI `Devices` panel to add devices on the network.
+
+The device manager service exposes the Robot Raconteur service
+`device_manager` with type `tech.pyri.device_manager.DeviceManager`.
+
+The `device_manager` service is started by `pyri-core` and is added
+as a default device using the `pyri.plugins.service_node_launch`
+plugin type. The command name is `pyri-device-manager-service`
+
+## devices_states Service
+
+* Python Package: `pyri-devices-states`
+* Conda package: `pyri-robotics-superpack`
+* Service: `pyri-devices-states-service`
+* robdef: `tech.pyri.devices_states`
+* Repo: https://github.com/pyri-project/pyri-devices-states
+
+The teach pendant software needs to track and display the status
+and state of the devices in the system. The `devices_states`
+service is used to collect and aggregate this data, and
+provide a centralized distribution of the current state
+of all devices. It also provides utility functions for
+querying `DeviceInfo` and specialized info structures
+like `RobotInfo`. There are four reasons that this
+service is needed:
+
+1. Providing a central distribution point means that clients do
+not have to connect to each individual device
+1. Security and/or network restrictions may not allow every
+device to connect to every other device
+1. The WebUI may not be able to connect to every device
+due to restrictions on WebSocket networking
+1. The WebUI (and possibly other clients) cannot process
+incoming state data at high rates, which can be
+beyond 1kHz from many devices
+
+The `devices_states` service provides updated data at approximately 
+10 Hz.
+It is intended to be used for display and data logging. It is
+not recommended it be used for real-time control. The WebUI
+uses `devices_states` for all device status and state display
+information.
+
+The state data is provided by the `devices_states` wire, with
+type `tech.pyri.devices_states.PyriDevicesStates`. This structure
+contains a map of type `tech.pyri.devices_states.PyriDeviceState`,
+one entry for each device, which has the following fields:
+
+| Field Name | Field Type (simplified) | Description |
+| ---        | ---                     | ---         |
+| `local_device_name` | `string` | The `local_device_name` alias |
+| `device` | `Identifier` | The Robot Raconteur device Identifier |
+| `connected`   | `bool`  | True if the device is currently connected to `devices_states` |
+| `ready`   | `bool`      | True if the device is ready for operation |
+| `error`   | `bool`      | True if the device is in an error state |
+| `info_seqno` | `uint32` | The `seqno` of the current state information from the device |
+| `state` | `PyriDeviceStateTyped{list}` | Map of device type specific information. See below. |
+| `extended` | `varvalue{string}` | Future-proofing field to hold additional information |
+
+The `PyriDeviceState` structure holds the state information for
+the individual devices. The `local_device_name`, `device`, `connected`,
+`ready`, `error`, and `info_seqno` are common to all device types,
+and are used to determine the readiness and error status of the system.
+The `state` field is more complex, and contains device type specific
+information. For instance, the `com.robotraconteur.robotics.robot.Robot` type
+provides state information using the
+`com.robotraconteur.robotics.robot.RobotState` structure. The
+`tech.pyri.devices_states.PyriDeviceStateTyped` structure holds the
+device specific state information. It has the following fields:
+
+| Field Name | Field Type (simplified) | Description |
+| ---        | ---                     | ---         |
+| `type`     | `string`  | The Robot Raconteur type of the state structure |
+| `display_flags`| `string{list}` | A human readable list of state flags that should be displayed to the user |
+| `state_data` | `varvalue` | The device specific state data, as a `varvalue` |
+
+The `PyriDeviceStateTypes` is contained in the `state` 
+map of `PyriDeviceState`. The key of this map value
+should be the same as `type`.
+
+The `devices_states` service requires plugins to understand 
+the type specific state data and info structures. This is
+implemented using the `pyri.plugins.device_type_adapter`. 
+The associated plugin factory `PyriDeviceTypeAdapterPluginFactory`
+is expected to create adapters that extend
+`PyriDeviceTypeAdapter`. Upon creation, the adapter will
+connect to the specified device and begin streaming
+state data contained in `PyriDeviceTypeAdapterExtendedState`
+instances. The `PyriDeviceTypeAdapter` has three
+important functions:
+
+| Function Name | Description |
+| ---           | ---         |
+| `get_robotraconteur_type` | Return the Robot Raconteur service object type this adapter connects |
+| `get_extended_device_infos` | Return device type specific device infos structure |
+| `get_extended_device_states` | Return the device type specific state information, contained in `PyriDeviceTypeAdapterExtendedState` instances |
+
+The devices states service exposes the Robot Raconteur service
+`devices_states` with type 
+`tech.pyri.devices_states.PyriDevicesStatesService`.
+
+The `devices_states` service is started by `pyri-core` and is added
+as a default device using the `pyri.plugins.service_node_launch`
+plugin type. The command name is `pyri-devices-states-service`.
+
+## sandbox Service
+
+* Python Package: `pyri-sandbox`
+* Conda package: `pyri-robotics-superpack`
+* Service: `pyri-sandbox-service`
+* robdef: `tech.pyri.sandbox`
+* Repo: https://github.com/pyri-project/pyri-sandbox
+
+The sandbox is responsible for executing user developed
+procedures in the Python Restricted Industrial (PyRI)
+python dialect. (See 
+[pyri_dialect_specification.md](pyri_dialect_specification.md) for
+more information on the Python dialect.) PyRI procedures
+are single Python functions that take zero or more arguments,
+which are always strings. These procedures are intended
+to be extremely simple; they do not support most of the
+Python language features, and only allow the single
+function per procedure. The design goal is to create
+an environment that even the most novice programmers
+can safely develop high-level commands for automation
+systems. If anything more than simple programming
+capability is required, the developer should have
+the required skillset to develop a plugin
+or extension using the standard Python environment.
+
+Procedures are similar in design to AWS Lambda functions,
+in the sense that they do not persist data between
+execution of procedures. All data that should be persisted
+must be stored in the global variable table.
+
+The sandbox is implemented using the RestrictedPython
+package. This package is developed by the Zope
+foundation, and was originally intended to allow
+untrusted users of a website to safely execute Python
+scripts on the server side. However, it is flexible
+enough to be used for the purpose of implementing
+PyRI execution. RestrictedPython works by
+intercepting the compilation process, and then
+running the code in a restricted `exec` environment.
+It uses three strategies to accomplish this:
+
+1. AST Interception and Policies: The Abstract Syntax Tree
+is an intermediate step in the compilation of Python source
+code to byte code. RestrictedPython intercepts the Abstract
+Syntax Tree to restrict which node types are allowed
+to exist, and to add "guard functions" when necessary. 
+This behavior is customized using "Policies".
+2. Guard Functions: "Guard functions" intercept certain
+Python operations, and either check that the operation
+is allowed or modify the results of the operation. These
+functions are inserted by the AST modification and
+executed at runtime.
+3. Built-ins/Injected Functions: The functions in the
+`exec` environment are passed to the `exec` call
+as dictionaries passed to the `locals`
+and `globals` parameters. The `locals` parameter
+also contains the `__builtins__` dictionary, which
+contains the standard built-in language Python functions.
+RestrictedPython modifies the contents of `__builtins__`
+by either removing functions or replacing them
+with guard functions. Additional functions
+can be added to `locals`, `globals`, or 
+`__builtins__` to make them available to
+code running inside the sandbox.
+
+The full technical details of
+how RestrictedPython are implemented are
+complex, and it is recommended that the package
+documentation and the Python language compilation
+documentation be consulted for more information.
+
+For most users and developers of the teach pendant
+software, it will not be necessary to know the
+intricate details of how the restricted language
+dialect works.
+
+Procedures are stored in the `variable_storage`
+database as plain strings with the device
+name `procedure`.
+They have the tag `blockly` or `pyri` to
+distinguish the type of procedure. The WebUI
+procedure editors save the procedures directly
+to the database, and the sandbox reads them
+from the database when execution is requested.
+
+The sandbox is capable of executing restricted
+Python (PyRI) or Blockly procedures. Blockly
+procedures are executed by "generating" Python
+code from the block diagram. Each Blockly
+block has JavaScript code that can generate the
+appropriate Python snippet from the parameters
+provided by the block. The overall Blockly
+generator generates a full Python
+function by running the generator for each
+block and then generating the full source
+for the block diagram. In practice, the
+sandbox works by converting the XML save
+of a block diagram to Python.
+
+The sandbox does the conversion between
+XML and Python as part of the service,
+without requiring a browser to be running.
+This is complicated, because Blockly is a
+JavaScript project, and is originally intended
+to only run in the browser. The sandbox
+uses Node.js with the `node-blockly` NPM package
+to execute the generation. A small JavaScript program
+is used to do the generation. The JavaScript program
+is executed from Python, and uses a temporary
+directory for each compilation to exchange data.
+Because it can take up to a few seconds to load the
+JavaScript program, the sandbox service starts the
+script when the sandbox service is started, and
+uses HTTP requests to trigger generation.
+
+The sandbox uses the following steps to
+generate Python from XML scripts:
+
+1. (Python) A temporary directory is created
+for the generation
+1. (Python) Block definitions and generation
+code are retrieved from plugins and stored
+in the temporary directory as files
+1. (Python) The block diagram is saved
+as an XML file in the temporary directory
+1. (Python) The sandbox makes an HTTP request
+to the JavaScript program, specifying the
+path of the temporary directory
+1. (JavaScript) The JavaScript program receives
+the request, and calls the generation function
+with the specified temporary directory
+1. (JavaScript) The Blockly workspace is reset to remove
+any previously loaded blocks and other data
+1. (JavaScript )The JavaScript program reads the block
+definitions and generation code, and loads
+into the Blockly workspace
+1. (JavaScript) The XML diagram is loaded into the workspace
+1. (JavaScript) The Blockly code generator for Python is called.
+Any error is returned to the sandbox as part of the
+HTTP response and the function returns
+1. (JavaScript) The sandbox saves the generated Python
+code to the temporary directory, and returns success
+to the HTTP request
+1. (Python) The sandbox reads the saved Python
+code from the temporary directory
+1. (Python) The temporary directory is deleted
+1. (Python) The sandbox executes the generated
+Python using the restricted python environment
+
+The generation process is made more complicated by
+the surprising lack of a good Python to V8 interop package.
+The lack of interoperability required the use of interprocess
+communication, the simplest of which is HTTP. If a
+cleaner design option becomes available, it will
+be used in the future.
+
+Installing Node.js, `node-blockly`, and the generation
+script can be difficult because it is not directly
+compatible with Python distribution. The best solution
+currently available is to use Conda. See the
+readme for `pyri-sandbox` for more information on
+installing and configuring the JavaScript generation script.
+
+"Sandbox Functions" are used to add functionality
+to user procedures. Sandbox functions are normal
+functions that are desired to accept/return types
+compatible with the sandbox, and are injected
+into the `locals` dictionary with the procedure
+`exec()`. Since these functions are in the `locals`
+dictionary, they are available to be used by
+code executing in the sandbox. These functions
+are specified in `entry_points` plugins type
+`pyri.plugins.sandbox_functions`. The factory
+`PyriSandboxFunctionsPluginFactory` returns
+a dictionary of the sandbox functions provided by
+the plugin. The docstring of the function should
+also be filled in. This docstring will be made
+available to the user.
+
+The sandbox provides a `PyriSandboxContext`
+object as a thread-local storage for data needed
+by sandbox functions and access to devices. The fields 
+can be accessed as static fields, for example 
+`node = PyriSandboxContext.node` will retrieve the
+current Robot Raconteur node. The sandbox
+context has the following fields:
+
+| Field Name | Type (simplified) | Description |
+| ---        | ---  | ---         |
+| `node`     | `RobotRaconteur Node` | The Robot Raconteur node being used by the sandbox |
+| `device_manager` | `DeviceManagerClient` | A device manager client instance, configured to pre-connect to all devices |
+| `print_func` | `Callable[str]` | The sandbox `print()` function implementation. Use to print to the procedure output |
+| `action_runner` | `PyriSandboxActionRunner` | Utility class to run asynchronous Robot Raconteur generator function actions |
+| `context_vars` | `Dict[str,Any]` | Dictionary of context variables that are global to current procedure |
+| `proc_result` | `str` | The result of the procedure, which is passed to the state machine at exit |
+
+The `entry_points` plugin type `pyri.plugins.blockly`
+is used to add Blockly blocks to the sandbox and to the
+editor workspace. The `PyriBlocklyPluginFactory`
+returns block and category definitions using
+`PyriBlocklyBlock` and `PyriBlocklyCategory` named
+tuples. These tuples have the following fields:
+
+`PyriBlocklyBlock` fields:
+
+| Field Name | Type (simplified) | Description |
+| ---        | ---               | ---         |
+| `name`     | `str` | The name of the block. The name of the block is sometimes referred to as the block "type" in documentation. |
+| `category` | `str` | The name of the toolbox category the block belongs to |
+| `doc`      | `str` | Documentation string about the block |
+| `json`     | `str` | JSON formatted block definition, as defined by the Blockly project |
+| `python_generator` | The JavaScript source for the block generator function |
+
+`PyriBlocklyCategory` fields:
+
+| Field Name | Type (simplified) | Description |
+| ---        | ---               | ---         |
+| `name`     | `str` | The name of the category |
+| `json`     | `str` | JSON formatted category definition, as defined by the Blockly project |
+
+The `json` and `python_generator` fields from the
+Blockly definitions are essentially passed-through
+to Blockly. The teach pendant does not check or
+modify these fields.
+
+The sandbox uses the  standard Blockly
+categories `Logic`, `Loops`, `Math`, `Text`, `Lists`,
+and `Variables`. These categories and blocks
+they contain are "built-in` to blockly, and do
+not require any logic or support by the teach
+pendant.
+
+The `pyri-common` package provides many commonly
+sandbox functions and corresponding Blockly
+blocks.
+
+| Sandbox Function/Blockly Category | Description |
+| ---   | --- |
+| `Time` | Provides utility functions for sleeping and synchronization |
+| `Linalg` | Linear Algebra functions |
+| `Globals` | Functions to read, write, and modify global variables in the program database |
+| `Geometry` | Functions for geometry operations, including transformations and poses |
+| `Util` | General purpose utility functions, including setting procedure result |
+
+The `pyri-robotics` and `pyri-vision` packages add numerous
+sandbox functions and Blockly blocks. See the documentation
+for these packages for more information.
+
+The sandbox service exposes the Robot Raconteur service
+`sandbox` with type `tech.pyri.sandbox.PyriSandbox`.
+
+The `sandbox` service is started by `pyri-core` and is added
+as a default device using the `pyri.plugins.service_node_launch`
+plugin type. The command name is `pyri-sandbox-service`
+
+## program_master Service
+
+* Python Package: `pyri-program-master`
+* Conda package: `pyri-robotics-superpack`
+* Service: `pyri-program-master-service`
+* robdef: `tech.pyri.program_master`
+* Repo: https://github.com/pyri-project/pyri-program-master
+
+The program master is a simple state machine that executes
+procedures, selecting the next procedure to run based
+on the result of the previous procedure. The current
+step is saved in the program database, and the current
+step can be arbitrarily jumped by the user. This is intended
+to allow for easy top-level sequencing of an automation
+process, and to allow for resumption of an in-process
+procedure if there is an interruption, or a step
+needs to be repeated.
+
+The state machine program is stored in the
+global variable table using the
+`tech.pyri.program_master.PyriProgram` structure,
+which has the following fields:
+
+| Field Name | Field Type (simplified) | Description |
+| ---        | ---                     | ---         |
+| `name` | `string` | The name of the program |
+| `steps` | `PyriProgramStep{list}` | The steps of the state machine |
+| `extended` | `varvalue{string}` | Future-proofing field |
+
+Each step is stored using the `PyriProgramStep{list}` structure,
+which has the following fields:
+
+| Field Name | Field Type (simplified) | Description |
+| `step_name` | `string` | Human-readable name of the step |
+| `step_id`   | `UUID` | 128-bit UUID for step |
+| `procedure_name` | `string` | The name of the procedure executed by the step |
+| `procedure_args` | `string{list}` | The args to pass to the procedure. Must match number of expected arguments |
+| `next` | `PyriProgramStepNext{list}` | The list of conditionals controlling the next step to execute |
+
+Steps are identified using UUIDs. This allows
+the user to re-name steps without breaking the
+state machine. It is the responsibility of the editor
+to convert human-readable step names to UUID and
+vice-versa.
+
+The step will attempt to execute the procedure
+named in `procedure_name`,
+passing the `procedure_args` if specified. The
+procedure may raise an error, return without
+setting a result, or set a plain case-insensitive
+result string. The procedure result is different
+than the sandbox function return. The result is set using
+the `proc_result_set()` sandbox function or
+associated Blockly block. The default
+result is `DEFAULT`. If an error occurs,
+the result will be `ERROR`. The state machine
+will then check the contents of `next` to see
+what it should do next. By default, the
+state machine will:
+
+* If an error is returned by procedure, stop
+state machine and set error flag
+* If successful and a step follows the current one,
+run the next step
+* If successful and there is no following step,
+stop
+
+The `PyriProgramStepNext` structure allows for the default
+behavior to be modified. It has the following fields:
+
+| Field Name | Field Type (simplified) | Description |
+| `result`   | `string` | The result string to match (case-insensitive) |
+| `op_code` | `PyriProgramStepNextOpCode` | The op-code. May be `stop`, `next`, `jump`, `error` |
+| `jump_target` | `UUID` | The target step if the op-code is `jump` |
+| `extended` | `varvalue{string}` | Future-proofing field |
+
+The result of the procedure will be matched to the 
+`next` entry with a matching `result`. If no match occurs
+and the current result is `ERROR`, the program is stopped
+and error is set. If no match occurs and the result is not `ERROR`,
+it is checked against `DEFAULT`. If there is no default step,
+the next step is attempted, or execution is stopped.
+A step may have the following op-codes:
+
+| Op-code | Description |
+| ---     | ---         |
+| `stop`  | Stop execution of state machine after current step without error |
+| `next`  | Continue to the next step |
+| `jump`  | Jump to the specified step |
+| `error` | Stop execution of state machine and set error state |
+
+The `PyriProgram` structure is stored in the variable database
+under device `program` with variable name `main`. The current
+step is stored in the `program_master_current_step` as a
+hexadecimal UUID string. If no current step exists because
+of a reset or the program has finished, the
+`program_master_current_step` is deleted.
+`program_master_current_step` is updated every time the
+step changes.
+
+The program master service exposes the Robot Raconteur service
+`program_master` with type `tech.pyri.program_master.PyriProgramMaster`.
+
+The `program_master` service is started by `pyri-core` and is added
+as a default device using the `pyri.plugins.service_node_launch`
+plugin type. The command name is `pyri-program-master-service`
+
+## WebUI Server Service
+
+* Python Package: `pyri-webui-server`
+* Conda Package: `pyri-robotics-superpack`
+* Service: `pyri-webui-server`
+* Repo: https://github.com/pyri-project/pyri-webui-server
+
+The WebUI server is an HTTP server that the browser
+connects to run the WebUI interface. The server
+uses the Python Sanic package for the HTTP server.
+The WebUI server provides the following
+capabilities:
+
+* **Static Files**: The WebUI requires several HTML,
+JavaScript, and CSS static files to load the WebUI
+* **Configuration Information**: A JSON formatted
+`config` file is dynamically generated and provided
+to the WebUI. This includes the URL of the device
+manager service, information about sandbox functions/
+blockly blocks, and a list of Python wheels,
+among other important information
+* **Dependencies**: The WebUI requires Pyodide
+and a number of JavaScript dependencies. These
+are provided by the WebUI server.
+* **Wheels**: The Python software for the WebUI
+are packaged as wheels. The WebUI client downloads
+and installs the list of wheels specified by
+`config` from the WebUI server.
+* **Routes**: The WebUI allows plugins to add
+specialized "routes". These routes allow
+plugins to add more capabilities to the WebUI
+server.
+
+Dependencies and Wheels need to be installed separately
+from the Python packages. The simplest way to handle
+this installation is to use Conda, which can correctly
+contain the Python packages and related WebUI dependencies.
+See the `pyri-webui-server` readme for more information.
+
+Plugins are used to add "routes" to the HTTP server.
+Routes are essentially Python functions that receive
+an HTTP request, and return an HTTP response. Plugins
+are given the route `/plugins/<plugin_name>` . Since
+the route is a simple function, the plugin can implement
+any desired HTTP functionality that is supported by Sanic.
+
+The `entry_points` plugin type `pyri.pyri.plugins.webui_server`
+is used for WebUI server plugins, with plugin factory
+type `PyriWebUIServerPluginFactory`.
+
+## pyri-core
+
+* Python Package: `pyri-core`
+* Conda Package: `pyri-robotics-superpack`
+* Service: `pyri-core`
+* Repo: https://github.com/pyri-project/pyri-core
+
+Starting and managing the lifecycle the myriad of services that make
+up the runtime is a challenging task. Existing options like `roslaunch`
+were insufficient for the teach pendant, which needs to dynamically
+start, stop, restart, add, and remove services. `pyri-core` implements
+some of this functionality, although currently is can only start
+and stop services. It will be improved to add more
+capabilities over time. `pyri-core` is instructed which services
+to start using the `pyri.plugins.service_node_launch`.
+
+`pyri-core` also adds "default" services to the program as
+virtual devices, if they are not already added. The WebUI and
+programming environment will not function properly if the default
+services are not added as devices.
+
+
+
+## Runtime Plugin Type List
+
+The following runtime plugin types are available:
+
+| Entry Point | Factory Type | Description |
+| ---         | ---          | ---         |
+| `pyri.plugins.robdef` | `pyri.plugins.robdef.PyriRobDefPluginFactory` | Additional Robot Raconteur robdef service types |
+| `pyri.plugins.sandbox_functions` | `pyri.plugins.sandbox_functions.PyriSandboxFunctionsPluginFactory` | Functions to make available in the PyRI sandbox |
+| `pyri.plugins.blockly` | `pyri.plugins.blockly.PyriBlocklyPluginFactory` | Custom blocks and generators to add to the blockly workspace |
+| `pyri.plugins.device_type_adapter` | `pyri.plugins.device_type_adapter.PyriDeviceTypeAdapterPluginFactory` | Add support for additional device state and device info types |
+| `pyri.plugins.webui_server` | `pyri.plugins.webui_server.PyriWebUIServerPluginFactory` | WebUI server routes and data to serve to the teach pendant browser user interface |
+| `pyri.plugins.service_node_launch` | `pyri.plugins.service_node_launch.PyriServiceNodeLaunchFactory` | Instruct `pyri-core` to launch and manage additional services |
+
+# WebUI
+
+The WebUI uses a "bootstrapping" procedure for
+initialization. The static files and dependencies
+are loaded, and Pyodide is instructed to
+run the bootstrap Python script, which is included
+as a static file. This bootstrap file checks
+the `config` JSON data, and retrieves a list
+of wheels to install. These wheels are
+downloaded, and installed into the Pyodide
+virtual filesystem. The bootstrap procedure
+then runs the appropriate code.
 
 # References
 
