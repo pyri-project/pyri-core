@@ -622,6 +622,7 @@ and use the following local names:
 The `pyri-robotics` expects the following physical devices by default:
 
 | Local Name | Robot Raconteur Type | Description |
+| ---        | ---                  | ---         |
 | `robot` | `com.robotraconteur.robotics.robot.Robot` | The default robot |
 | `tool` | `com.robotraconteur.robotics.tool.Tool` | The default robot gripper |
 | `joystick` | `com.robotraconteur.hid.joystick.Joystick` | The SpaceMouse jog joystick (optional) |
