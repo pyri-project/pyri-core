@@ -343,8 +343,8 @@ programmers. Blockly and the closely related MIT Scratch visual
 programming languages are very popular in education and are widely used
 in primary and secondary schools. Programs written in Blockly are
 compiled to Python for execution. To allow for more granular control,
-Blockly has the option to insert prefixes before and after statements
-\[2\]. This can be used to track and regulate the execution of the
+Blockly has the option to insert prefixes before and after statements. 
+This can be used to track and regulate the execution of the
 Blockly programs. The following figures demonstrate this behavior.
 (Blocks are assigned random strings as identifiers, as shown in the
 \_\_begin\_blockly\_statement and \_\_end\_blockly\_statement Python
@@ -618,6 +618,15 @@ and use the following local names:
 | `vision_robot_calibration` | `tech.pyri.vision.robot_calibration.CameraRobotCalibrationService` | `pyri-vision-robot-calibration-service` | Yes |
 | `vision_aruco_detection` | `tech.pyri.vision.aruco_detection.VisionArucoDetectionService` | `pyri-vision-aruco-detection-service` | Yes |
 | `vision_template_matching` | `tech.pyri.vision.template_matching.VisionTemplateMatchingService` | `pyri-vision-template-matching-service` | Yes |
+
+The `pyri-robotics` expects the following physical devices by default:
+
+| Local Name | Robot Raconteur Type | Description |
+| `robot` | `com.robotraconteur.robotics.robot.Robot` | The default robot |
+| `tool` | `com.robotraconteur.robotics.tool.Tool` | The default robot gripper |
+| `joystick` | `com.robotraconteur.hid.joystick.Joystick` | The SpaceMouse jog joystick (optional) |
+
+Additional robots and tools can have arbitrary names.
 
 The device manager stores the added devices in the `variable_storage` service,
 with the device name `device_manager`. Each device is stored in a single variable,
@@ -1218,71 +1227,357 @@ The following runtime plugin types are available:
 
 # WebUI
 
-The WebUI uses a "bootstrapping" procedure for
-initialization. The static files and dependencies
-are loaded, and Pyodide is instructed to
-run the bootstrap Python script, which is included
-as a static file. This bootstrap file checks
-the `config` JSON data, and retrieves a list
-of wheels to install. These wheels are
-downloaded, and installed into the Pyodide
-virtual filesystem. The bootstrap procedure
-then runs the appropriate code.
+* Python Package: `pyri-webui-browser`
+* Conda Package: `pyri-robotics-superpack` WebUI Wheel
+* Repo: https://github.com/pyri-project/pyri-webui-browser
 
-# References
+The WebUI is a powerful user interface, that runs inside
+a web browser as a normal web application. Only a modern
+web browser is required; no extensions are necessary,
+although some optional Robot Raconteur extensions may
+be added for additional functionality. Implementing the
+user interface as a web application has several
+of advantages:
 
-\[1\] "RestrictedPython," 2019. \[Online\]. Available:
-https://github.com/zopefoundation/RestrictedPython. \[Accessed 8 1
-2020\].
+* **Portability/Compatibility**: Web browsers provide a
+standardized runtime environment, which is available
+on nearly all platforms. Node.js Electron can be used
+to run the WebUI as an installed application in the future
+if necessary.
+* **Zero Install**: Clients do not need to install the WebUI
+software. They only need to connect to the WebUI HTTP server
+using a modern web browser.
+* **Large Community**: Web development has a massive community,
+with numerous software libraries, support communities, and
+development talent available.
+* **Ease of use**: Web browser development is significantly
+easier than application development.
+* **Security**: The browser provides an isolated execution
+environment for the WebUI, adding an additional layer
+of security.
 
-\[2\] "Pure Python Linear Algebra," \[Online\]. Available:
-https://github.com/dmishin/pyla. \[Accessed 8 1 2020\].
+Modern web applications are developed using a combination
+of HTML5, CSS, JavaScript, and Web Assembly. See the W3C
+documentation for more information on these technologies.
 
-\[3\] "Coroutines
-and Tasks," \[Online\]. Available:
-https://docs.python.org/3/library/asyncio-task.html. \[Accessed 8 1
-2020\].
+Robot Raconteur is designed to run in a web browser and
+connect to services using Web Sockets. Web Sockets are a
+special hardened TCP/IP wrapper protocol intended to
+allow browsers to safely create persistent connections
+to servers. Robot Raconteur is able to create and
+accept Web Socket connections, allowing for interoperability
+with browsers and web servers. The WebUI takes
+advantage of this capability to communicate between
+the runtime and the WebUI.
 
-\[4\] "Bolckly.Generator," \[Online\]. Available:
-https://developers.google.com/blockly/reference/js/Blockly.Generator.
-\[Accessed 8 1 2020\].
+A significant challenge when writing robotics software
+in the browser is the lack of existing robotics
+and numerical computing libraries available in JavaScript.
+While some do exist, most robotics software is developed
+in C++, Python, or C\#. The recent addition of Web Assembly
+has greatly expanded the ability to run these and other
+languages in the web browser.
 
-\[5\] "Python Wheels," \[Online\]. Available:
-https://pythonwheels.com/. \[Accessed 9 1 2020\].
+Web Assembly (Wasm) is a standard portable
+binary-code format that allows for web applications
+to execute high-performance application code in the
+browser sandbox. A related project, Emscripten,
+is used to compile C/C++ to Wasm, and provide
+a form of operating system emulation that allows
+existing libraries to be compiled without
+major modifications, although the level of compatibility
+can vary greatly. Wasm and Emscripten have allowed
+for many other interpreted and virtual machine
+languages such as Python and C\# to run inside
+a web browser. This technological advance has allowed
+for greatly expanding the capabilities of the web browser.
 
-\[6\] "Package
-Discovery and Resource Access using pkg\_resources," \[Online\].
-Available:
-https://setuptools.readthedocs.io/en/latest/pkg\_resources.html.
-\[Accessed 9 1 2020\].
+The WebUI uses a Wasm/Emscripten implementation of 
+Python called Pyodide. Pyodide patches and compiles
+the CPython implementation to run inside a web 
+browser. It also includes many standard scientific
+Python packages, including `numpy` and `matplotlib`.
+Pyodide allows for existing Python robotics packages
+to run inside the browser, and allows for significant
+code sharing between the Runtime and WebUI, since
+they both are written on Python. A heavily modified
+version of Robot Raconteur has been merged with
+Pyodide to create an environment that contains
+the Robot Raconteur client node. Due to compilation
+issues, a separate distribution of Pyodide with
+Robot Raconteur statically compiled in was necessary.
+See https://github.com/robotraconteur/robotraconteur_pyodide .
 
-\[7\] "Pyodide: The Python scientific stack,
-compiled to WebAssembly," \[Online\]. Available:
-https://github.com/iodide-project/pyodide. \[Accessed 9 1 2020\].
+Because Pyodide runs in a browser environment, it
+is slower than a native implementation. The exact
+performance penalty is unknown, however the anecdotal
+performance has been acceptable for the WebUI
+use case.
 
-\[8\]
-"Visual Studio Code," \[Online\]. Available:
-https://code.visualstudio.com/. \[Accessed 9 1 2020\].
+Except for the use of Pyodide and Robot Raconteur, the
+WebUI is a standard web application It uses common
+libraries as dependencies. Most of these libraries
+have tens or even hundreds of thousands of stars
+on GitHub, making them some of the most popular
+software libraries in existence.
 
-\[9\] "Theia:
-Cloud & Desktop IDE," \[Online\]. Available: https://theia-ide.org/.
-\[Accessed 9 1 2020\].
+* GoldenLayout (https://golden-layout.com/): A
+multi-window layout manager that is used to create
+rearrangeable and stackable panels
+* Blockly (https://developers.google.com/blockly):
+Block-based visual programming toolkit
+* Monaco Editor (https://microsoft.github.io/monaco-editor/):
+Standalone version of the Visual Studio Code text editor,
+including advanced editing and syntax highlighting capabilities
+* Bootstrap (https://getbootstrap.com/): HTML, CSS,
+and JavaScript visual interface library
+* Vue.js (https://vuejs.org/): Progressive JavaScript
+framework
+* BootstrapVue (https://bootstrap-vue.org/): Support
+library to use Bootstrap and Vue.js together
+* Bootstrap Table (https://bootstrap-table.com/): Table
+for Bootstrap and Vue.js with extended capabilities
+* Font Awesome (https://fontawesome.com/): Font library
+used to add icons to user interface
+* jQuery (https://jquery.com/): Ubiquitous JavaScript
+support library
 
-\[10\] "Electron," \[Online\]. Available:
-https://electronjs.org/. \[Accessed 9 1 2020\].
+The WebUI displays multiple panels to the user. These
+panels are either part of the `pyri-webui-browser` package,
+or are added as plugins. GoldenLayout is used to implement
+the panel handling capabilities, allowing for a customizable,
+extensible user interface. (The specific panels
+are discussed in a later section.) The various dependencies
+listed above are used to implement the user interface, using
+standard web interface design techniques.
 
-\[11\] "The Chromium
-Project," \[Online\]. Available: https://www.chromium.org/. \[Accessed 9
-1 2020\].
+Installation of Pyodide and the other various
+dependencies can be challenging. Conda is
+the easiest way to package all the files
+required to distribute the WebUI with
+the WebUI server. See the `pyri-webui-server`
+package readme for more information.
 
-\[12\] "Visual Studio Code: User Interface," \[Online\].
-Available: https://code.visualstudio.com/docs/getstarted/userinterface.
-\[Accessed 9 1 2020\].
+## Bootstrapping and Initialization
 
-\[13\] "Visual Studio Code: Webview API,"
-\[Online\]. Available:
-https://code.visualstudio.com/api/extension-guides/webview. \[Accessed 9
-1 2020\].
+Starting the WebUI interface is a complex process that
+begins by the user connecting the browser to the WebUI
+server on the runtime computer. The URL for the
+WebUI is typically localhost (http://localhost:8000)
+or the IP address of the runtime computer
+(for example http://192.168.50.123:8000, but the address
+may vary). By default, the WebUI listens on port 8000.
+The WebUI will then begin the bootstrapping and
+initialization process.
 
-\[14\] "setuptools-meta," \[Online\]. Available:
-https://github.com/noirbizarre/setuptools-meta. \[Accessed 9 1 2020\].
+The WebUI software is contained in Python Wheels. Because
+the web browser does not natively understand Wheels,
+a bootstrapping process is necessary. The bootstrapping
+process has the following steps:
+
+1. The browser connects to the WebUI server, and
+downloads `index.html`
+1. `index.html` instructs the browser to download
+the dependencies, including Pyodide, which
+loads asynchronously
+1. Once Pyodide is loaded, the `bootstrap.py` script
+execution is started
+1. `bootstrap.py` checks the `config` JSON information
+from, and receives a list of Python Wheels
+1. The Python Wheels are downloaded from the server, and
+extracted into the Pyodide virtual filesystem
+1. The `PyriWebUIBrowser` is created and
+the main loop executed to begin the initialization
+process
+
+The
+primary wheel, `pyri-webui-browser`, contains the
+`PyriWebUIBrowser` class, which is the central object
+of the WebUI. `PyriWebUIBrowser` initializes the
+WebUI after bootstrapping is complete. The initialization
+process has the following steps:
+
+1. Initialize the GoldenLayout window manager
+1. Load the panels from plugins. All panels, including
+the standard ones, are loaded using plugin factories.
+1. Create `DeviceManagerClient` and connect to the 
+`device_manager` service using the connection URL
+provided in `config`.
+1. Connect the `DeviceManagerClient` to necessary
+service types (auto-connection is disabled for WebUI
+`DeviceManagerClient`)
+1. Connect to `devices_states` service to begin
+streaming system state information and displaying
+to user
+
+At this point, the WebUI is fully operational.
+
+## Panel Plugins
+
+All panels are provided by `entry_points` plugins with
+the `PyriWebUIBrowserPanelPluginFactory` factory type.
+Since the WebUI is loaded into Pyodide using
+Wheel package files, the standard `entry_points`
+plugin discovery method works normally. The
+`entry_points` type `pyri.plugins.webui_browser_panel`
+is used for panel plugins.
+
+The `PyriWebUIBrowserPluginFactory` contains
+two important functions: `get_panels_infos()`
+and `add_panel(...)`. The `get_panels_infos()`
+function returns a list of the panels that
+the plugin provides. Each panel has a name,
+a type, and a priority. Once
+all available panels have been enumerated, 
+the `add_panel(...)` function is called,
+which adds the panel to the GoldenLayout.
+The order `add_panel(...)` is called is determined
+by the priority of the panel.
+
+The panels may be normal GoldenLayout components,
+or they may be stacks of components, creating
+a nested tab set.
+
+The added panels typically contain a Vue.js component,
+and use Bootstrap for visual elements like buttons
+and tables. The static data like HTML files are
+included in the Wheels as static resources.
+See the extension developers guide for more information.
+## Standard Panels
+
+See [InterfaceMenuDocumentation.md](InterfaceMenuDocumentation.md) for images of the standard panels.
+
+* **Welcome**: The welcome panel shows the project logo and other miscellaneous information about the project.
+* **Devices**: The devices panel shows a table of all the devices that have been added to the program. It is implemented using `bootstrap-table`. The table has the following columns:
+  * **Local Name**: The local alias name for the device. This is the name used to reference the device in the other panels and procedures.
+  * **Device Name**: The name provided by the device itself.
+  * **Device Types**: The shorthand name of the Robot Raconteur types the device provides.
+  * **Status**: The status of the device.
+  * **Action**: Display more information about the device, or delete the device.
+  * The "Add Device" button can be used to add more devices to the program.
+* **Program**: The program panel is used to develop the user program. It consists of the following sub-panels:
+  * **Main**: The main panel shows and modifies the top-level state machine.
+  * **Procedure List**: The procedure list shows a table of existing procedures. The list is implemented using `blockly-table` Procedures can be developed in Blockly or restricted Python dialect (PyRI). The editors open new sub-tabs for either Blockly or PyRI. These editors both use HTML iframes to load
+  the editors. The Blockly editor uses the standard Blockly workspace, with additional blocks provided by the WebUI server. The PyRI editor uses the Microsoft Monaco Editor, which is a standalone version of the Visual Studio Code editor.
+  * **Globals List** The globals list shows a table of the current global variables. New variables can be created and variables can be edited using variable editor plugins from this panel. The table is implemented using `bootstrap-table` The globals table has the following columns:
+    * **Name**: The name of the global variable. Global variables have a flat namespace, meaning there are no directories.
+    * **Docstring**: A user defined documentation string describing the variable.
+    * **Data Type**: The Robot Raconteur data type of the variable.
+    * **Tags**: Tags that describe the context of the variable.
+    * **Actions**: Actions that can be done on the variable. These include "Open", "Copy", "Display Info", and "Delete".
+  * **Output**: The output window displays console output from the procedures as they are executed. The output includes procedure start and stop, error tracebacks, and "print" function output.
+
+The Blockly workspace loads blocks from the WebUI server,
+and adds them to the list of available blocks. This is done
+using a special `/blockly_blocks` route that is added to the WebUI
+server that provides block definitions and categories. Similarly,
+the `/sandbox_functions` route is added for sandbox function docstrings
+for the "Insert Function" dialog in the PyRI editor. This dialog
+provides a list of the available sandbox functions with docstrings,
+and allows the user to select and insert into the editor.
+
+## Variable Editor Plugins
+
+The "Globals" panel allows the user to add new
+and modify existing variables. This is implemented
+using variable editor dialogs. Variable editor
+plugins provide these dialogs for a specific
+combinations of variable types and tags.
+The `entry_points` plugin type
+`pyri.plugins.webui_browser_variable_dialog` is used
+for variable editor plugins, with factory
+type `PyriWebUIBrowserVariableDialogPluginFactory`.
+The factory provides supported
+variable types using a list of 
+`PyriWebUIBrowserVariableDialogInfo` named tuples,
+and has functions to show dialogs for new variables
+or to edit a existing variable.
+## Robot Raconteur communication
+
+The `DeviceManagerClient` is used by the WebUI
+to connect to other devices/virtual devices
+in the system. In general,
+the web browser should avoid connecting to
+devices that are not intended for web browser
+connection. Most physical devices will not have
+web socket origin settings configured for the WebUI,
+so it will not be possible to connect directly from
+the browser. Instead, all access should be done using
+runtime services which isolate the WebUI from the device.
+The `PyriServiceNodeSetup` helper class should be used
+for services that the WebUI will connect. This helper
+class is a more capable version of the standard node 
+setup classes that will configure the service to allow
+WebUI connections.
+
+The `DeviceManagerClient` returns Robot Raconteur
+subscriptions, which can be used to object object
+references are create wire/pipe subscriptions.
+One major limitation of the web browser environment
+is that only asynchronous operations are supported.
+This is because only a single thread is allowed in the
+web browser. Robot Raconteur and Pyodide both support
+the `async`/`await` Python features, so in practice
+the lack of blocking operations is not a significant
+obstacle.
+
+## Robot and Vision Panels
+
+The `pyri-robotics-browser` and `pyri-vision-browser`
+packages add additional panels for robotics
+and vision:
+
+* **Jog**: Provides a jog control panel for robots. It has the following capabilities:
+  * Select active robot and active tool
+  * Display robot state information
+  * Change robot to Halt or Jog mode
+  * Set jog speed, enable or disable joystick
+  * Jog robot in joint or task space
+  * Save, load, and edit waypoints
+  * Open and close the tool
+* **Camera**: Provides a list of cameras, and allows for live viewing the camera. The viewer is capable of saving individual images or sequences of images. The saved images can also be saved with a snapshot of the `devices_states` current state data for future use. The images are saved to the global variable database.
+
+# Conda Package Distribution
+
+PyRI is challenging to distribute due
+to the large set of dependencies, and the
+mixed nature of the code. Conda is used,
+since it provides cross-platform, language
+independent package distribution. The
+anaconda.org channel `pyri-project`
+(https://anaconda.org/pyri-project) contains
+the PyRI packages, and several dependencies
+that are not available on other channels.
+Packages are built using `conda-smithy`
+(https://github.com/conda-forge/conda-smithy)
+The feedstocks are located on GitHub, and
+use GitHub Actions to build 
+(https://github.com/pyri-project-conda).
+
+Because of the complexity of the various
+packages, a single Conda package is used
+for the teach pendant packages, and includes
+the `pyri-robotics` and `pyri-vision` packages.
+This packages is called `pyri-robotics-superpack`.
+
+Special directories are required for the
+`pyri-sandbox` and `pyri-webui-servire` packages
+to hold extra files for Node.js, NPM web dependencies,
+and WebUI wheels. The contents of these directories
+cannot be installed automatically be PyPi or setup.py,
+so they need to be configured manually by the sure.
+With Conda, the contents of these directories can
+be incuded in the package, and the location of these
+packages can be set using environmental variables.
+The following environmental variables are set
+by the Conda environment to point to the correct location:
+
+| Env Variable | Value | Description |
+| ---          | ---   | ---         |
+| `PYRI_SANDBOX_BLOCKLY_COMPILER_DIR` | `$CONDA_PREFIX/pyri-project/pyri-sandbox/blockly_compiler` | Blockly generator directory with required NPM packages installed |
+| `PYRI_WEBUI_STATIC_DATA_DIR` | `$CONDA_PREFIX/pyri-project/pyri-webui-server` | Server directory containing NPM packages, Robot Raconteur Pyodide, and WebUI Wheels |
+
+Instructions an creating packages is being developed
+for the Robot Raconteur ecosystem, and should
+be referred to for instructions on creating packages.
+
