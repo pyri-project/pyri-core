@@ -1104,6 +1104,7 @@ The `PyriProgramStepNext` structure allows for the default
 behavior to be modified. It has the following fields:
 
 | Field Name | Field Type (simplified) | Description |
+| ---        | --- | --- |
 | `result`   | `string` | The result string to match (case-insensitive) |
 | `op_code` | `PyriProgramStepNextOpCode` | The op-code. May be `stop`, `next`, `jump`, `error` |
 | `jump_target` | `UUID` | The target step if the op-code is `jump` |
