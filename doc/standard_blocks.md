@@ -239,6 +239,8 @@ Return the length of a string.
 
 ### Print
 
+![if block](figures/blocks/text_print.png)
+
 Print a string or other value to the output. This output will be visible in the "Output" window of the teach pendant WebUI.
 
 ## Variables
