@@ -1,0 +1,133 @@
+# Development Workspace Configuration
+
+## Python VirtualEnv
+
+It is recommended that a Python virtual environment be used for development. See https://docs.python.org/3/tutorial/venv.html for more information on creating a virtual environment. A parent directory should be created, and in that directory, all modules should be checked out and a `venv` directory created for the virtual environment using:
+
+```
+python3 -m venv venv
+```
+
+Next, go into each package directory, and execute:
+
+```
+python3 -m pip install -e .
+```
+This command will create an "editable install" in the virtual environment. The package will behave like a normal Python package, but will point to the current source code rather than copying the source into the venv package directory. See https://the-hitchhikers-guide-to-packaging.readthedocs.io/en/latest/pip.html#installing-from-a-vcs for more information.
+
+## Windows
+
+### Preparation
+
+Begin by downloading and installing the latest Python version from: https://www.python.org/downloads/ PyRI requires Python 3.8 or greater.
+
+Download and install Git from https://git-scm.com/download/win
+
+Next, install vstools by running the following command:
+
+    python -m pip install vcstool
+
+It may be necessary to run this command using an administrative command prompt https://www.isunshare.com/windows-10/2-ways-to-run-command-prompt-as-administrator-in-win-10.html
+
+Download and install  NodeJS LTS and NPM from https://nodejs.org/en/download/ This is necessary for the Blockly compiler.
+
+Download and install Visual Studio 2019 Community https://visualstudio.microsoft.com/downloads/ Make sure to select the C++ and Python workload https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=msvc-160
+
+Install the Windows Terminal https://docs.microsoft.com/en-us/windows/terminal/get-started
+
+### Clone and initialize
+
+Create a new directory to hold the files. Change to that directory in a command prompt, and run:
+
+    vcs import --input https://raw.githubusercontent.com/pyri-project/pyri-core/master/pyri.repos
+    cd scripts
+    create_python_venv
+    init_workspace_packages
+
+### Run PyRI and initialize default devices
+
+Create a terminal, and change to the `scripts` directory. Run to start all services in tabs in the terminal:
+
+    run_all
+
+Add default devices. This only has to be done once:
+
+    add_default_devices
+
+Now, open firefox and go to http://localhost:8000 The PyRI WebUI will start.
+
+### Run PyRI
+
+To run PyRI, change to the `scripts` directory and run `run_all`. Navigate to http://localhost:8000 with firefox
+
+### Debugging with VS Code
+
+PyRI can be debugged with VS Code. Be sure to select the Python interpreter in `venv\Scripts\python` using the `Select Python Interpreter` task https://code.visualstudio.com/docs/python/environments Use the `launch.json` file in the `scripts` directory to configure the launch profiles for the PyRI service nodes.
+
+### Updating
+
+To update PyRI, change to the project root directory and run:
+
+    vcs pull
+
+Next, change to the `scripts` directory and run:
+
+    python install_webui_browser_wheels.py
+
+Restart all services to complete updating.
+
+## Linux
+
+### Preparation
+
+Ubuntu 20.04 or greater required. Run the following:
+
+    sudo apt install python3-pip python3-venv libboost-all-dev curl git
+
+Next, install vcstool by running the following command:
+
+    sudo pip3 install vcstool
+
+Install the Node.js version 14.x
+
+    curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+
+Create a new directory, change to that directory in a command prompt, and initialize the workspace
+
+    mkdir -p pyri/software
+    cd pyri/software
+    vcs import --input https://raw.githubusercontent.com/pyri-project/pyri-core/master/pyri.repos
+    cd scripts
+    ./create_python_venv
+    wget -P ~/Downloads https://github.com/robotraconteur/robotraconteur/releases/download/v0.15.2/RobotRaconteur-0.15.2-cp38-cp38-linux_x86_64.whl
+    ../venv/bin/python -m pip install ~/Downloads/RobotRaconteur-0.15.2-cp38-cp38-linux_x86_64.whl
+    ./init_workspace_packages
+
+### Run PyRI and initialize default devices
+
+Create a terminal, and change to the `scripts` directory. Run to start all services in tabs in the terminal:
+
+    ./run_all
+
+Add default devices. This only has to be done once:
+
+    ./add_default_devices
+
+Now, open firefox and go to http://localhost:8000 The PyRI WebUI will start.
+
+### Run PyRI
+
+To run PyRI, change to the `scripts` directory and run `./run_all`. Navigate to http://localhost:8000 with firefox
+
+### Updating
+
+To update PyRI, change to the project root directory and run:
+
+    vcs pull
+
+Next, change to the `scripts` directory and run:
+
+    python install_webui_browser_wheels.py
+
+Restart all services to complete updating.

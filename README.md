@@ -1,11 +1,18 @@
 # PyRI Open Source Teach Pendant Core Module
 
+The Python Restricted Industrial (PyRI) Open Source Teach Pendant is designed to provide a simple, high-level programming environment for Open-Source ecosystems like Robot Raconteur and ROS. The objective is to allow engineers who are not software experts to access the powerful capabilities of these ecosystems. It provides a simple programming environment using Blockly, Restricted Python, and a top-level state machine. The Python Restricted Industrial Python dialect is a simplified subset of Python intended to be easier to use for novice programmers, to be more robust, and to be more verifiable than standard Python. This project also includes plans for a prototype teach pendant and runtime cabinet based on a Raspberry Pi, Surface Tablet, and NUC.
+
+![](doc/figures/readme/welcome_panel.png) ![](doc/figures/readme/jog_panel.png) ![](doc/figures/readme/pick_and_drop_blockly.png) ![](doc/figures/readme/pick_and_drop_pyri.png) ![](doc/figures/readme/camera_viewer_panel.png) ![](doc/figures/readme/pendant_prototype.jpg)
+
+Get started with PyRI by installing from Conda. See [Conda Install](#conda-install). See [Documentation](#documentation) for the available documentation. It is highly recommended that the Robot Raconteur training simulator be installed and used to learn to use the software.
+
+The PyRI software is designed to work with Robot Raconteur device drivers, and Robot Raconteur proxy services for ROS devices. See https://github.com/robotraconteur/robotraconteur-directory for a directory of available drivers.
 ## Conda Install
 
 Conda is the easiest way to install PyRI. Begin by installing Anaconda or Miniconda with Python version 3.8. Once installed, run the following in a conda prompt to install PyRI:
 
 ```
-conda create -n pyri -c conda-forge -c robotraconteur -c pyri-project robotraconteur_training_sim pyri-robotics-superpack
+conda create -n pyri -c conda-forge -c robotraconteur -c pyri-project pyri-robotics-superpack
 ```
 
 Activate the new conda environment:
@@ -20,130 +27,56 @@ Now run PyRI:
 pyri-core --db-file=my_project.db
 ```
 
-To install the training simulator, see https://github.com/robotraconteur-contrib/robotraconteur_training_sim/blob/master/README.md
+Use Firefox or Chrome to open http://localhost:8000
 
-## Development Workspace Configuration
+The `pyri-robotics-superpack` Conda package includes the base teach pendant packages, `pyri-robotics`, and `pyri-vision`. It dose NOT include the Tesseract motion planner. See https://github.com/pyri-project/pyri-tesseract-planning/blob/master/README.md for installation instructions.
 
-### Windows
+To install the training simulator, see https://github.com/robotraconteur-contrib/robotraconteur_training_sim/blob/master/README.md . It is highly recommended that the training simulator be used to learn the PyRI software.
 
-#### Preparation
+## Documentation
 
-Begin by downloading and installing the latest Python version from: https://www.python.org/downloads/ PyRI requires Python 3.8 or greater.
+* WebUI Interface Documentation: [InterfaceMenuDocumentation.md](doc/InterfaceMenuDocumentation.md)
+* User Programming Guide: [user_programming_guide.md](doc/user_programming_guide.md)
+* Teach Pendant Construction Instructions: [TeachPendantConstructionInstructions.md](doc/TeachPendantConstructionInstructions.md)
 
-Download and install Git from https://git-scm.com/download/win
+Blocks and Functions Reference:
 
-Next, install vstools by running the following command:
+* Standard Blockly Blocks: [standard_blocks.md](doc/standard_blocks.md)
+* Util: [util_blocks_functions.md](doc/util_blocks_functions.md)
+* Globals: [globals_blocks_functions.md](doc/globals_blocks_functions.md)
+* Time: [time_blocks_functions.md](doc/time_blocks_functions.md)
+* Linalg: [linalg_blocks_functions.md](doc/linalg_blocks_functions.md)
+* Geometry: [geometry_blocks_functions.md](doc/geometry_blocks_functions.md)
+* Robotics: [robot_blocks_functions.md](https://github.com/pyri-project/pyri-robotics/blob/master/doc/robot_blocks_functions.md)
+* Vision: [vision_blocks_functions.md](https://github.com/pyri-project/pyri-vision/blob/master/doc/vision_blocks_functions.md)
 
-    python -m pip install vcstool
+Development Reference:
 
-It may be necessary to run this command using an administrative command prompt https://www.isunshare.com/windows-10/2-ways-to-run-command-prompt-as-administrator-in-win-10.html
+* Software Architecture: [pyri_software_architecture.md](doc/pyri_software_architecture.md)
+* Development Environment Setup: [development_env_setup.md](doc/development_env_setup.md)
+* Extension Development Guide: [plugin_development.md](doc/plugin_development.md)
 
-Download and install  NodeJS LTS and NPM from https://nodejs.org/en/download/ This is necessary for the Blockly compiler.
+## pyri-core Service
 
-Download and install Visual Studio 2019 Community https://visualstudio.microsoft.com/downloads/ Make sure to select the C++ and Python workload https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=msvc-160
+The `pyri-core` package contained in this repository contains the `pyri-core` service. This service is used to launch the other microservices that make up the teach pendant runtime. See [pyri_software_architecture.md](doc/pyri_software_architecture.md) for more information on how this works.
 
-Install the Windows Terminal https://docs.microsoft.com/en-us/windows/terminal/get-started
+Command line example:
 
-#### Clone and initialize
+    pyri-core --db-file=my_project.db
 
-Create a new directory to hold the files. Change to that directory in a command prompt, and run:
+Command line arguments:
 
-    vcs import --input https://raw.githubusercontent.com/pyri-project/pyri-core/master/pyri.repos
-    cd scripts
-    create_python_venv
-    init_workspace_packages
+| Option | Type | Required | Description |
+| ---    | ---  | ---      | ---         |
+| `--db-file=` | File | Either `--db-file` or `--db-url` | The file to store the user database in using SQLite format |
+| `--db-url=`  | SQLAlchemy URL | Either `--db-file` or `--db-url` | The SQLAlchemy URL of the database to use |
+| `--no-add-default-devices` | Flag | No | Disable adding default devices to a new project database |
 
-#### Run PyRI and initialize default devices
+The database file to store the user program must be specified as `--db-file` or `--db-url`. The `--db-url` option can use an arbitrary database supported by SQLAlchemy. Other extension packages may add additional command line options to `pyri-core`. Check the documentation for each package for more information.
 
-Create a terminal, and change to the `scripts` directory. Run to start all services in tabs in the terminal:
+## PyRI Packages
 
-    run_all
-
-Add default devices. This only has to be done once:
-
-    add_default_devices
-
-Now, open firefox and go to http://localhost:8000 The PyRI WebUI will start.
-
-#### Run PyRI
-
-To run PyRI, change to the `scripts` directory and run `run_all`. Navigate to http://localhost:8000 with firefox
-
-#### Debugging with VS Code
-
-PyRI can be debugged with VS Code. Be sure to select the Python interpreter in `venv\Scripts\python` using the `Select Python Interpreter` task https://code.visualstudio.com/docs/python/environments Use the `launch.json` file in the `scripts` directory to configure the launch profiles for the PyRI service nodes.
-
-#### Updating
-
-To update PyRI, change to the project root directory and run:
-
-    vcs pull
-
-Next, change to the `scripts` directory and run:
-
-    python install_webui_browser_wheels.py
-
-Restart all services to complete updating.
-
-### Linux
-
-#### Preparation
-
-Ubuntu 20.04 or greater required. Run the following:
-
-    sudo apt install python3-pip python3-venv libboost-all-dev curl git
-
-Next, install vcstool by running the following command:
-
-    sudo pip3 install vcstool
-
-Install the Node.js version 14.x
-
-    curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-    sudo apt-get install -y nodejs
-
-Create a new directory, change to that directory in a command prompt, and initialize the workspace
-
-    mkdir -p pyri/software
-    cd pyri/software
-    vcs import --input https://raw.githubusercontent.com/pyri-project/pyri-core/master/pyri.repos
-    cd scripts
-    ./create_python_venv
-    wget -P ~/Downloads https://github.com/robotraconteur/robotraconteur/releases/download/v0.15.2/RobotRaconteur-0.15.2-cp38-cp38-linux_x86_64.whl
-    ../venv/bin/python -m pip install ~/Downloads/RobotRaconteur-0.15.2-cp38-cp38-linux_x86_64.whl
-    ./init_workspace_packages
-
-#### Run PyRI and initialize default devices
-
-Create a terminal, and change to the `scripts` directory. Run to start all services in tabs in the terminal:
-
-    ./run_all
-
-Add default devices. This only has to be done once:
-
-    ./add_default_devices
-
-Now, open firefox and go to http://localhost:8000 The PyRI WebUI will start.
-
-#### Run PyRI
-
-To run PyRI, change to the `scripts` directory and run `./run_all`. Navigate to http://localhost:8000 with firefox
-
-#### Updating
-
-To update PyRI, change to the project root directory and run:
-
-    vcs pull
-
-Next, change to the `scripts` directory and run:
-
-    python install_webui_browser_wheels.py
-
-Restart all services to complete updating.
-
-## PyRI Components
-
-PyRI currently consists of the following components:
+PyRI currently consists of the following packages:
 
 * `pyri-common`: https://github.com/pyri-project/pyri-common
 * `pyri-variable-storage`: https://github.com/pyri-project/pyri-variable-storage
@@ -151,42 +84,25 @@ PyRI currently consists of the following components:
 * `pyri-sandbox`: https://github.com/pyri-project/pyri-sandbox
 * `pyri-webui-server`: https://github.com/pyri-project/pyri-webui-server
 * `pyri-core`: https://github.com/pyri-project/pyri-core
+* `pyri-program-master`: https://github.com/pyri-project/pyri-program-master
+
+Optional packages
+
 * `pyri-robotics`: https://github.com/pyri-project/pyri-robotics
+* `pyri-vision`: https://github.com/pyri-project/pyri-vision
+* `pyri-tesseract-planning`: https://github.com/pyri-project/pyri-tesseract-planning
 
 Additional developer tools:
 
 * `pyri-example-plugin`: https://github.com/pyri-project/pyri-example-plugin
 * `pyri-scripts`: https://github.com/johnwason/pyri-scripts (development scripts and examples to trial components)
 
-To clone all repositories for PyRI using vcstool run:
+## Acknowledgment
 
-    vcs import --input https://raw.githubusercontent.com/pyri-project/pyri-core/master/pyri.repos
+This work was supported in part by Subaward No. ARM-TEC-19-01-F-24 from the Advanced Robotics for Manufacturing ("ARM") Institute under Agreement Number W911NF-17-3-0004 sponsored by the Office of the Secretary of Defense. ARM Project Management was provided by Christopher Adams. The views and conclusions contained in this document are those of the authors and should not be interpreted as representing the official policies, either expressed or implied, of either ARM or the Office of the Secretary of Defense of the U.S. Government. The U.S. Government is authorized to reproduce and distribute reprints for Government purposes, notwithstanding any copyright notation herein.
 
-## Plugin Architecture
+This work was supported in part by the New York State Empire State Development Division of Science, Technology and Innovation (NYSTAR) under contract C160142. 
 
-PyRI uses setuptools `entry_points` to add plugins. See https://packaging.python.org/guides/creating-and-discovering-plugins/#using-package-metadata for an overview of how `entry_points` can be used to create and discover plugins.
+![](doc/figures/arm_logo.jpg) ![](doc/figures/nys_logo.jpg)
 
-PyRI plugin `entry_points` functions return "plugin factory" objects. These objects return the individual components that are made available by the plugins. The factories can be found in `pyri-common`, in the `pyri.plugins` package. The following `entry_points` are currently defined:
-
-| Entry Point | Factory Type | Description |
-| ---         | ---          | ---         |
-| `pyri.plugins.robdef` | `pyri.plugins.robdef.PyriRobDefPluginFactory` | Additional Robot Raconteur robdef service types |
-| `pyri.plugins.sandbox_functions` | `pyri.plugins.sandbox_functions.PyriSandboxFunctionsPluginFactory` | Functions to make available in the PyRI sandbox |
-| `pyri.plugins.blockly` | `pyri.plugins.blockly.PyriBlocklyPluginFactory` | Custom blocks and generators to add to the blockly workspace |
-| `pyri.plugins.webui_server` | `pyri.plugins.webui_server.PyriWebUIServerPluginFactory` | WebUI server routes and data to serve to the teach pendant browser user interface |
-
-## Python VirtualEnv
-
-It is recommended that a Python virtual environment be used for development. See https://docs.python.org/3/tutorial/venv.html for more information on creating a virtual environment. A parent directory should be created, and in that directory, all modules should be checked out and a `venv` directory created for the virtual environment using:
-
-```
-python3 -m venv venv
-```
-
-Next, go into each package directory, and execute:
-
-```
-python3 -m pip install -e .
-```
-This command will create an "editable install" in the virtual environment. The package will behave like a normal Python package, but will point to the current source code rather than copying the source into the venv package directory. See https://the-hitchhikers-guide-to-packaging.readthedocs.io/en/latest/pip.html#installing-from-a-vcs for more information.
-
+PyRI is developed by Rensselaer Polytechnic Institute, Wason Technology, LLC, and contributors.
