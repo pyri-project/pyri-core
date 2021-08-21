@@ -235,6 +235,9 @@ See [Examples](#examples) for examples of Blockly procedures.
 
 ## Examples
 
+* Hello World Example Procedure: [hello_world_example.md](hello_world_example.md)
+* Taught Pick and Place Procedure: [pick_and_place_example.md](pick_and_place_example.md)
+
 ## Blocks and Sandbox Functions Reference
 
 * Standard Blockly Blocks: [standard_blocks.md](standard_blocks.md)
