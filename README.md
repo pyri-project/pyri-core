@@ -1,3 +1,7 @@
+<p align="center">
+<img src="./doc/figures/pyri_logo_web.svg" height="200"/>
+</p>
+
 # PyRI Open Source Teach Pendant Core Module
 
 The Python Restricted Industrial (PyRI) Open Source Teach Pendant is designed to provide a simple, high-level programming environment for Open-Source ecosystems like Robot Raconteur and ROS. The objective is to allow engineers who are not software experts to access the powerful capabilities of these ecosystems. It provides a simple programming environment using Blockly, Restricted Python, and a top-level state machine. The Python Restricted Industrial Python dialect is a simplified subset of Python intended to be easier to use for novice programmers, to be more robust, and to be more verifiable than standard Python. This project also includes plans for a prototype teach pendant and runtime cabinet based on a Raspberry Pi, Surface Tablet, and NUC.
