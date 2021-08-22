@@ -85,16 +85,21 @@ PyRI currently consists of the following packages:
 * `pyri-common`: https://github.com/pyri-project/pyri-common
 * `pyri-variable-storage`: https://github.com/pyri-project/pyri-variable-storage
 * `pyri-device-manager`: https://github.com/pyri-project/pyri-device-manager
+* `pyri-devices-states`: https://github.com/pyri-project/pyri-devices-states
 * `pyri-sandbox`: https://github.com/pyri-project/pyri-sandbox
 * `pyri-webui-server`: https://github.com/pyri-project/pyri-webui-server
+* `pyri-webui-browser`: https://github.com/pyri-project/pyri-webui-browser
 * `pyri-core`: https://github.com/pyri-project/pyri-core
 * `pyri-program-master`: https://github.com/pyri-project/pyri-program-master
 
 Optional packages
 
 * `pyri-robotics`: https://github.com/pyri-project/pyri-robotics
+* `pyri-robotics-browser`: https://github.com/pyri-project/pyri-robotics-browser
 * `pyri-vision`: https://github.com/pyri-project/pyri-vision
+* `pyri-vision-browser`: https://github.com/pyri-project/pyri-vision-browser
 * `pyri-tesseract-planning`: https://github.com/pyri-project/pyri-tesseract-planning
+* `pyri-tesseract-planning-browser`: https://github.com/pyri-project/pyri-tesseract-planning-browser
 
 Additional developer tools:
 
