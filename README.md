@@ -53,12 +53,14 @@ Blocks and Functions Reference:
 * Geometry: [geometry_blocks_functions.md](doc/geometry_blocks_functions.md)
 * Robotics: [robot_blocks_functions.md](https://github.com/pyri-project/pyri-robotics/blob/master/doc/robot_blocks_functions.md)
 * Vision: [vision_blocks_functions.md](https://github.com/pyri-project/pyri-vision/blob/master/doc/vision_blocks_functions.md)
+* Tesseract: [tesseract_blocks_functions.md](https://github.com/pyri-project/pyri-tesseract-planning/blob/master/doc/tesseract_blocks_functions.md)
 
 Development Reference:
 
 * Software Architecture: [pyri_software_architecture.md](doc/pyri_software_architecture.md)
 * Development Environment Setup: [development_env_setup.md](doc/development_env_setup.md)
 * Extension Development Guide: [plugin_development.md](doc/plugin_development.md)
+* PyRI Dialect Specification: [pyri_dialect_specification.md](doc/pyri_dialect_specification.md)
 
 ## pyri-core Service
 
