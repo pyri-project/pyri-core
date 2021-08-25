@@ -8,6 +8,8 @@ The Python Restricted Industrial (PyRI) Open Source Teach Pendant is designed to
 
 ![](doc/figures/readme/welcome_panel.png) ![](doc/figures/readme/jog_panel.png) ![](doc/figures/readme/pick_and_drop_blockly.png) ![](doc/figures/readme/pick_and_drop_pyri.png) ![](doc/figures/readme/camera_viewer_panel.png) ![](doc/figures/readme/pendant_prototype.jpg)
 
+Demo video: https://www.youtube.com/watch?v=9KSYgGpG8mk
+
 Get started with PyRI by installing from Conda. See [Conda Install](#conda-install). See [Documentation](#documentation) for the available documentation. It is highly recommended that the Robot Raconteur training simulator be installed and used to learn to use the software.
 
 The PyRI software is designed to work with Robot Raconteur device drivers, and Robot Raconteur proxy services for ROS devices. See https://github.com/robotraconteur/robotraconteur-directory for a directory of available drivers.
