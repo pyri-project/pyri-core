@@ -10,32 +10,31 @@ The Python Restricted Industrial (PyRI) Open Source Teach Pendant is designed to
 
 Demo video: https://www.youtube.com/watch?v=9KSYgGpG8mk
 
-Get started with PyRI by installing from Conda. See [Conda Install](#conda-install). See [Documentation](#documentation) for the available documentation. It is highly recommended that the Robot Raconteur training simulator be installed and used to learn to use the software.
+Get started with PyRI by installing from using pip from a private package server. See [Documentation](#documentation) for the available documentation. It is highly recommended that the Robot Raconteur training simulator be installed and used to learn to use the software.
 
-The PyRI software is designed to work with Robot Raconteur device drivers, and Robot Raconteur proxy services for ROS devices. See https://github.com/robotraconteur/robotraconteur-directory for a directory of available drivers.
-## Conda Install
-
-Conda is the easiest way to install PyRI. Begin by installing Anaconda or Miniconda with Python version 3.8. Once installed, run the following in a conda prompt to install PyRI:
+To install, run the following commands in a new directory. Only tested on Windows. Python 3.9 x64 is required.
 
 ```
-conda create -n pyri -c conda-forge -c robotraconteur -c pyri-project pyri-robotics-superpack
+c:\python39\python -m venv venv
+venv\Scripts\activate
+python -m pip install --upgrade pip
+
+python -m pip install  --extra-index-url=https://pyri-project.github.io/pyri-package-server/  pyri-core pyri-cli pyri-device-manager pyri-devices-states pyri-program-master pyri-robotics pyri-robotics-motion-program pyri-sandbox pyri-variable-storage pyri-vision pyri-webui-server pyri-webui-resources
+
+pyri-cli webui-install --extra-index-url=https://pyri-project.github.io/pyri-package-server/ pyri-robotics-browser pyri-webui-browser pyri-vision-browser pyri-robotics-motion-program-browser
 ```
 
-Activate the new conda environment:
-
-```
-conda activate pyri
-```
-
-Now run PyRI:
+PyRI is now installed. To run, execute:
 
 ```
 pyri-core --db-file=my_project.db
 ```
 
-Use Firefox or Chrome to open http://localhost:8000
+Use Firefox or Chrome to open http://localhost:8000 to see the user interface.
 
-The `pyri-robotics-superpack` Conda package includes the base teach pendant packages, `pyri-robotics`, and `pyri-vision`. It dose NOT include the Tesseract motion planner. See https://github.com/pyri-project/pyri-tesseract-planning/blob/master/README.md for installation instructions.
+
+The PyRI software is designed to work with Robot Raconteur device drivers, and Robot Raconteur proxy services for ROS devices. See https://github.com/robotraconteur/robotraconteur-directory for a directory of available drivers.
+
 
 To install the training simulator, see https://github.com/robotraconteur-contrib/robotraconteur_training_sim/blob/master/README.md . It is highly recommended that the training simulator be used to learn the PyRI software.
 
