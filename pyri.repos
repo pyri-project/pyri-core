@@ -60,9 +60,11 @@ repositories:
     type: git
     url: https://github.com/pyri-project/pyri-example-plugin
 
-  scripts:
+  pyri-cli:
     type: git
-    url: https://github.com/johnwason/pyri-scripts
+    url: https://github.com/pyri-project/pyri-cli
 
-
+  pyri-webui-resources:
+    type: git
+    url: https://github.com/pyri-project/pyri-webui-resources
     
