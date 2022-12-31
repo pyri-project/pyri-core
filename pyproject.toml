@@ -1,0 +1,45 @@
+[project]
+
+name = "pyri-core"
+version = "0.2.0"
+description = "PyRI Teach Pendant Core Runtime"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE.txt"}
+keywords = ["pyodide", "pyri-project", "pyri-runtime-package", "robotics"]
+authors = [
+    {name = "John Wason", email = "wason@wasontech.com"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Topic :: Scientific/Engineering"
+]
+
+dependencies = [
+    'pyri-common',
+    'RobotRaconteur',
+    'numpy',
+    'PyYAML',
+    'appdirs'    
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-asyncio"
+]
+
+[project.urls]
+homepage="http://pyri.tech"
+repository="https://github.com/pyri-project/pyri-core"
+
+[project.scripts]
+pyri-core = "pyri.core.__main__:main"
+
+[build-system]
+build-backend = 'setuptools.build_meta'
+requires = [
+    'setuptools',
+    'toml',
+]
