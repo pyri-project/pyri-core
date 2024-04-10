@@ -245,7 +245,7 @@ class PyriCore:
         if len(default_devices) == 0:
             return
 
-        filter = _DeviceManagerConnectFilter("pyri_device_manager")
+        filter = _DeviceManagerConnectFilter(RRN, "pyri_device_manager")
         device_manager_sub = RRN.SubscribeServiceByType("tech.pyri.device_manager.DeviceManager", filter.get_filter())
         if delay_seconds > 0:            
             await asyncio.sleep(delay_seconds)
